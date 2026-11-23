@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>ELWIDO Завод</title>
+<style>
+/* One-hand phone sheet for the factory floor: big tap targets, checkboxes, notes that survive a reload. */
+:root{--paper:#f2f4f3;--sheet:#fff;--ink:#1c2830;--ink2:#4b5a63;--rule:#cfd6d9;--hi:#f3c300;--hi-soft:#fff3bf;--red:#c2272d;--red-soft:#fbe9e9;--green:#2e7d4f;--green-soft:#e5f3ea}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#11171b;--sheet:#172026;--ink:#e3e9ec;--ink2:#a3b1b8;--rule:#2d3a42;--hi:#f3c300;--hi-soft:#3a3310;--red:#ef6a6f;--red-soft:#3a1c1e;--green:#6cc493;--green-soft:#173326;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#11171b;--sheet:#172026;--ink:#e3e9ec;--ink2:#a3b1b8;--rule:#2d3a42;--hi:#f3c300;--hi-soft:#3a3310;--red:#ef6a6f;--red-soft:#3a1c1e;--green:#6cc493;--green-soft:#173326;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-block:0 60px;padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
+main{max-width:640px;margin:0 auto}
+header{padding:18px 0 6px}
+header .k{font:600 12px ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+h1{font-size:30px;line-height:1.1;margin:6px 0 8px;text-wrap:balance}
+h1 span{background:linear-gradient(transparent 62%,var(--hi) 62%)}
+header p{margin:0;color:var(--ink2);font-size:15.5px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);display:flex;gap:6px;overflow-x:auto;padding:10px 0;margin:6px 0 4px;border-bottom:1px solid var(--rule)}
+nav a{flex:none;font:600 13px ui-monospace,Menlo,monospace;color:var(--ink);text-decoration:none;border:1px solid var(--rule);border-radius:999px;padding:7px 12px;background:var(--sheet)}
+section{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;margin:14px 0;padding:14px 14px 12px;scroll-margin-top:64px}
+h2{font-size:20px;margin:0 0 4px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+h2 small{font:600 12px ui-monospace,Menlo,monospace;color:var(--ink2);white-space:nowrap}
+.who{font:600 11.5px ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin:14px 0 2px}
+.sub{color:var(--ink2);font-size:15px;margin:0 0 6px}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px dotted var(--rule)}
+li:last-child{border-bottom:0}
+li input{flex:none;width:24px;height:24px;margin-top:1px;accent-color:var(--green)}
+li label{flex:1;min-width:0;cursor:pointer}
+li input:checked+label{color:var(--ink2);text-decoration:line-through}
+li b{font-weight:650}
+.why{display:block;font-size:14px;color:var(--ink2);margin-top:2px}
+.en{font-family:ui-monospace,Menlo,monospace;font-size:.86em;background:var(--paper);padding:1px 5px;border-radius:3px}
+.stop{background:var(--red-soft);border:1.5px dashed var(--red)}
+.stop h2{color:var(--red)}
+.goal{background:var(--hi-soft);border-left:4px solid var(--hi)}
+textarea{width:100%;min-height:84px;margin-top:10px;border:1px solid var(--rule);border-radius:5px;background:var(--paper);color:var(--ink);font:16px/1.45 system-ui,-apple-system,sans-serif;padding:9px 10px;resize:vertical}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+button{font:600 15px system-ui,-apple-system,sans-serif;border:1.5px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:5px;padding:11px 14px;cursor:pointer}
+button.ghost{background:var(--sheet);color:var(--ink)}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
+#msg{font-size:14px;color:var(--green);min-height:20px}
+ol{margin:6px 0 0;padding-left:22px}
+ol li{display:list-item;border:0;padding:3px 0}
+#all{display:none}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="k">ELWIDO · Čakajovce · шпаргалка на день</div>
+  <h1>День <span>на заводе</span></h1>
+  <p>Отмечай галочкой, что увидел и спросил. Ответы пиши в заметки под каждым блоком: они сохраняются на этом телефоне. Подробности — в «Базе», глава 06.</p>
+</header>
+
+<nav aria-label="Разделы">
+  <a href="#goal">Цели</a><a href="#see">Увидеть</a><a href="#q">12 вопросов</a><a href="#usa">Для США</a><a href="#take">Увезти</a><a href="#stop">Не делать</a><a href="#eve">Вечером</a>
+</nav>
+
+<section id="goal" class="goal">
+  <h2>Три цели дня</h2>
+  <ol>
+    <li><b>Понять предел завода:</b> какой размер, какой срок, где узкое место.</li>
+    <li><b>Увезти материал для американских клиентов:</b> фото, видео, образцы, документы.</li>
+    <li><b>Договориться с владельцами о трёх вещах:</b> NFRC, американская компания, твои условия на бумаге.</li>
+  </ol>
+  <p class="sub" style="margin-top:8px">Порядок, если можешь влиять: конструкторы → цех по ходу изделия → упаковка → разговор с владельцами. В цеху задавай один вопрос на каждом участке: «Как вы узнаёте, что эта деталь сделана правильно?»</p>
+</section>
+
+<section id="see">
+  <h2>Увидеть своими глазами <small>8</small></h2>
+  <ul>
+    <li><input type="checkbox" id="s1"><label for="s1"><b>Разрезанный угол рамы.</b><span class="why">На срезе герметик по всей плоскости и клей в камере. Сухой срез — будущая протечка. Попроси разрезать при тебе или показать образец.</span></label></li>
+    <li><input type="checkbox" id="s2"><label for="s2"><b>Пила: откуда берётся размер.</b><span class="why">Хорошо — из программы или со штрихкода, первую деталь меряют. Плохо — с бумажки.</span></label></li>
+    <li><input type="checkbox" id="s3"><label for="s3"><b>Участок остекления.</b><span class="why">Отдельный и чистый, стекло не стоит на бетоне, подкладки под пакет по схеме.</span></label></li>
+    <li><input type="checkbox" id="s4"><label for="s4"><b>Готовая раздвижная дверь lift-and-slide.</b><span class="why">Открой сам одной рукой. Сними на видео одним дублем: это лучший ролик для архитектора.</span></label></li>
+    <li><input type="checkbox" id="s5"><label for="s5"><b>Лист контроля на одно изделие.</b><span class="why">Свой лист на каждое окно, с подписью. Один лист на весь заказ — слабый контроль.</span></label></li>
+    <li><input type="checkbox" id="s6"><label for="s6"><b>Этикетка на изделии.</b><span class="why">Марка на этикетке совпадает с маркой на чертеже архитектора (W01, D01). Иначе на объекте окно поставят не в тот проём.</span></label></li>
+    <li><input type="checkbox" id="s7"><label for="s7"><b>Упаковка для моря.</b><span class="why">Углы защищены, стекло не касается стекла, на дереве клеймо HT (ISPM 15). Без клейма груз в США могут не впустить.</span></label></li>
+    <li><input type="checkbox" id="s8"><label for="s8"><b>Зона брака и переделок.</b><span class="why">Что там стоит и почему. По этому видно, где завод ошибается чаще всего.</span></label></li>
+  </ul>
+  <textarea id="n-see" placeholder="Что увидел: участок, наблюдение"></textarea>
+</section>
+
+<section id="q">
+  <h2>12 главных вопросов <small>кому</small></h2>
+  <p class="sub">Если отвечают «зависит» — проси пример на последнем заказе. Ответ записывай с именем.</p>
+
+  <div class="who">Начальник производства</div>
+  <ul>
+    <li><input type="checkbox" id="q1"><label for="q1"><b>Сколько м² отгрузили в каждом из последних 12 месяцев? Какой участок узкое место?</b><span class="why">«До 2 000 м²» — потолок. Нужен факт по месяцам.</span></label></li>
+    <li><input type="checkbox" id="q2"><label for="q2"><b>Сколько недель от утверждённых чертежей до готовности к отгрузке, по этапам? Когда завод закрыт на каникулы?</b><span class="why">От этого срок, который ты назовёшь клиенту. Август и Рождество в Европе часто нерабочие.</span></label></li>
+    <li><input type="checkbox" id="q3"><label for="q3"><b>Какое самое большое и тяжёлое изделие соберёте? А какое войдёт в обычный контейнер 40' HC?</b><span class="why">Проём двери контейнера около 2,34 × 2,58 м. Всё, что выше, едет под наклоном или в открытом контейнере, это дороже.</span></label></li>
+    <li><input type="checkbox" id="q4"><label for="q4"><b>Какая доля изделий идёт в переделку? Если брак найден в Нью-Йорке: сколько недель и кто платит?</b></label></li>
+  </ul>
+
+  <div class="who">Конструкторы</div>
+  <ul>
+    <li><input type="checkbox" id="q5"><label for="q5"><b>Кто мой инженер по вопросам из США и за сколько дней он отвечает? За сколько вы даёте цену по чертежам?</b><span class="why">Возьми имя, почту и мессенджер. Архитектор ждёт ответа дни, а не недели.</span></label></li>
+    <li><input type="checkbox" id="q6"><label for="q6"><b>Как вы работаете с дюймами и американскими узлами? Покажите чертежи одного заказа для США.</b></label></li>
+  </ul>
+
+  <div class="who">Стекло и комплектация</div>
+  <ul>
+    <li><input type="checkbox" id="q7"><label for="q7"><b>Чьи стеклопакеты? Есть ли американская маркировка безопасного стекла и сертификат на пакеты (IGCC)?</b><span class="why">«Нет» — нормальный ответ, если есть план и срок.</span></label></li>
+    <li><input type="checkbox" id="q8"><label for="q8"><b>Кто красит профиль и какой класс покрытия? Есть ли у краски подтверждение по AAMA 2604 или 2605?</b><span class="why">Американская спецификация называет AAMA, а не европейский Qualicoat.</span></label></li>
+  </ul>
+
+  <div class="who">Владельцы</div>
+  <ul>
+    <li><input type="checkbox" id="q9"><label for="q9"><b>NFRC: какие изделия сертифицируем первыми, к какому сроку и кто платит?</b><span class="why">Без этикетки NFRC дома до 3 этажей в Нью-Йорке для нас закрыты.</span></label></li>
+    <li><input type="checkbox" id="q10"><label for="q10"><b>Американская компания: кто владеет и в каких долях, кто импортёр?</b><span class="why">С 05.01.2027 «американским» импортёром считается фирма, где не меньше 51% владельцев — граждане США или с грин-картой. Иначе ввоз только через брокера с допуском CTPAT.</span></label></li>
+    <li><input type="checkbox" id="q11"><label for="q11"><b>Schüco: есть ли письменное право продавать изделия на этой системе в США?</b><span class="why">В Нью-Йорке у Schüco свой канал — Skyline Windows.</span></label></li>
+    <li><input type="checkbox" id="q12"><label for="q12"><b>Как считается цена завода для США и от чего моя доля? Когда это будет на бумаге?</b><span class="why">Попроси расчёт на одном реальном заказе: цена завода, доставка, пошлина, цена клиенту, сколько получил бы ты.</span></label></li>
+  </ul>
+  <textarea id="n-q" placeholder="Ответы: кто сказал, что, какие цифры"></textarea>
+</section>
+
+<section id="usa">
+  <h2>Отдельно для США <small>5</small></h2>
+  <p class="sub">На европейском заводе об этом обычно не думают, пока не спросишь.</p>
+  <ul>
+    <li><input type="checkbox" id="u1"><label for="u1"><b>Электрика.</b> Моторы раздвижных дверей, жалюзи, электрозамки: есть ли версии на 120 В / 60 Гц с американским допуском UL или ETL?<span class="why">Европейский знак CE в США допуск не заменяет. Что требуется на объекте, решает инспектор и электрик.</span></label></li>
+    <li><input type="checkbox" id="u2"><label for="u2"><b>Москитные сетки.</b> Какие есть для окон tilt-turn и для раздвижных дверей?<span class="why">Американский клиент ждёт сетку почти всегда и спросит на первой встрече.</span></label></li>
+    <li><input type="checkbox" id="u3"><label for="u3"><b>Ограничители открывания.</b> Можно ли поставить на tilt-turn фурнитуру «сначала откидывание» и ограничитель на 4,5 дюйма (114 мм)?<span class="why">В многоквартирных домах Нью-Йорка, где живут дети до 10 лет, нужны решётки или такие ограничители.</span></label></li>
+    <li><input type="checkbox" id="u4"><label for="u4"><b>Двери.</b> Какие замки и цилиндры идут в комплекте, можно ли американские? Какой порог?<span class="why">Для доступной среды порог обычно не выше полдюйма (13 мм). Точное требование даёт архитектор.</span></label></li>
+    <li><input type="checkbox" id="u5"><label for="u5"><b>Монтажный комплект.</b> Что завод кладёт в ящик: подрамники, крепёж, ленты, запасные ручки и уплотнители? Есть ли инструкция по монтажу на английском?</label></li>
+  </ul>
+  <textarea id="n-usa" placeholder="Что есть для США, чего нет"></textarea>
+</section>
+
+<section id="take">
+  <h2>Увезти с собой <small>7</small></h2>
+  <ul>
+    <li><input type="checkbox" id="t1"><label for="t1"><b>Угловые образцы и срезы профиля</b> по системам, которые пойдут в США.</label></li>
+    <li><input type="checkbox" id="t2"><label for="t2"><b>Образцы покрытий и по одной ручке</b> для окна и раздвижной двери.</label></li>
+    <li><input type="checkbox" id="t3"><label for="t3"><b>Полный файл одного американского заказа:</b> запрос, чертежи, предложение, договор, переписка, фактические расходы, проблемы.</label></li>
+    <li><input type="checkbox" id="t4"><label for="t4"><b>Образец чертежей на согласование</b> (shop drawings) и заполненный лист контроля.</label></li>
+    <li><input type="checkbox" id="t5"><label for="t5"><b>Копии документов:</b> письма системодателей, лицензия красильщика, декларации на изделия.</label></li>
+    <li><input type="checkbox" id="t6"><label for="t6"><b>Фото и видео:</b> каждый участок по 10–15 секунд, станки крупно, разрезанный угол, упаковка. Снимай горизонтально, без лиц и чужих этикеток.</label></li>
+    <li><input type="checkbox" id="t7"><label for="t7"><b>Три контакта:</b> инженер, логист, качество. Имя, почта, мессенджер.</label></li>
+  </ul>
+  <textarea id="n-take" placeholder="Что обещали прислать и к какому числу"></textarea>
+</section>
+
+<section id="stop" class="stop">
+  <h2>Не делать</h2>
+  <ul>
+    <li><span>✕</span><label><b>Не обещай клиентам по увиденному.</b> «Я видел дверь шесть метров» — наблюдение. Обещание — размер из таблицы завода и расчёт на проём.</label></li>
+    <li><span>✕</span><label><b>Не снимай чужие заказы без разрешения.</b> Спроси до съёмки, что можно показывать в США.</label></li>
+    <li><span>✕</span><label><b>Не согласовывай на ходу цены и сроки для США.</b> Запиши названные цифры и попроси подтвердить письмом.</label></li>
+    <li><span>✕</span><label><b>Не говори «сертифицировано»</b>, пока не держишь документ: номер, дата, кто выдал.</label></li>
+  </ul>
+</section>
+
+<section id="eve">
+  <h2>Вечером</h2>
+  <ul>
+    <li><input type="checkbox" id="e1"><label for="e1"><b>Запиши ответы и открытые вопросы</b>, пока помнишь. У каждого открытого вопроса — кто отвечает и к какому числу.</label></li>
+    <li><input type="checkbox" id="e2"><label for="e2"><b>Отправь партнёрам письмо «как я понял наши договорённости».</b> Так устные слова становятся текстом.</label></li>
+    <li><input type="checkbox" id="e3"><label for="e3"><b>Скинь мне заметки</b> — обновлю курс под реальные данные завода.</label></li>
+  </ul>
+  <textarea id="n-eve" placeholder="Открытые вопросы и сроки"></textarea>
+</section>
+
+<div class="bar">
+  <button type="button" id="copy">Скопировать все заметки</button>
+  <button type="button" class="ghost" id="reset">Очистить галочки и заметки</button>
+</div>
+<div id="msg" role="status"></div>
+<textarea id="all" aria-label="Все заметки" readonly></textarea>
+</main>
+<script>
+(function(){
+  var KEY="elwido-zavod-v1",st={c:{},n:{}};
+  try{var r=localStorage.getItem(KEY);if(r){var p=JSON.parse(r);st.c=p.c||{};st.n=p.n||{};}}catch(e){}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
+  var boxes=[].slice.call(document.querySelectorAll('input[type=checkbox]'));
+  var notes=[].slice.call(document.querySelectorAll('section textarea'));
+  boxes.forEach(function(b){b.checked=!!st.c[b.id];b.addEventListener('change',function(){st.c[b.id]=b.checked;save();});});
+  notes.forEach(function(t){t.value=st.n[t.id]||"";t.addEventListener('input',function(){st.n[t.id]=t.value;save();});});
+  var msg=document.getElementById('msg'),all=document.getElementById('all');
+  function collect(){
+    var out=["ELWIDO, завод, "+new Date().toLocaleDateString("ru-RU"),""];
+    [].forEach.call(document.querySelectorAll('section'),function(s){
+      var h=s.querySelector('h2');if(!h)return;
+      var done=[].filter.call(s.querySelectorAll('input[type=checkbox]'),function(b){return b.checked;});
+      var open=[].filter.call(s.querySelectorAll('input[type=checkbox]'),function(b){return !b.checked;});
+      var t=s.querySelector('textarea');
+      if(!done.length&&!open.length&&!(t&&t.value.trim()))return;
+      out.push("== "+h.firstChild.textContent.trim());
+      open.forEach(function(b){out.push("[ ] "+b.nextElementSibling.querySelector('b').textContent.trim());});
+      done.forEach(function(b){out.push("[x] "+b.nextElementSibling.querySelector('b').textContent.trim());});
+      if(t&&t.value.trim())out.push("Заметки: "+t.value.trim());
+      out.push("");
+    });
+    return out.join("\n");
+  }
+  document.getElementById('copy').addEventListener('click',function(){
+    var text=collect();
+    function fallback(){all.style.display="block";all.value=text;all.focus();all.select();msg.textContent="Текст выделен ниже: скопируй его вручную.";}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){msg.textContent="Скопировано. Вставь в заметки или в письмо.";},fallback);}
+    else fallback();
+  });
+  var armed=false,rs=document.getElementById('reset');
+  rs.addEventListener('click',function(){
+    if(!armed){armed=true;rs.textContent="Точно очистить? Нажми ещё раз";setTimeout(function(){armed=false;rs.textContent="Очистить галочки и заметки";},4000);return;}
+    st={c:{},n:{}};save();boxes.forEach(function(b){b.checked=false;});notes.forEach(function(t){t.value="";});
+    armed=false;rs.textContent="Очистить галочки и заметки";msg.textContent="Очищено.";
+  });
+})();
+</script>
+</body>
+</html>
