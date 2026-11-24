@@ -10,12 +10,14 @@
    Standalone on purpose (no build step), same look as ELWIDO_Zavod.html. All state lives in localStorage. */
 :root{--paper:#f2f4f3;--sheet:#fff;--ink:#1c2830;--ink2:#4b5a63;--rule:#cfd6d9;--hi:#f3c300;--hi-soft:#fff3bf;--red:#c2272d;--red-soft:#fbe9e9;--green:#2e7d4f;--green-soft:#e5f3ea;--amber:#8a5a00;--amber-soft:#ffecc7}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#11171b;--sheet:#172026;--ink:#e3e9ec;--ink2:#a3b1b8;--rule:#2d3a42;--hi:#f3c300;--hi-soft:#3a3310;--red:#ef6a6f;--red-soft:#3a1c1e;--green:#6cc493;--green-soft:#173326;--amber:#e3ae45;--amber-soft:#3b2c0e;color-scheme:dark}}
+:root[data-theme="light"]{color-scheme:light}
 :root[data-theme="dark"]{--paper:#11171b;--sheet:#172026;--ink:#e3e9ec;--ink2:#a3b1b8;--rule:#2d3a42;--hi:#f3c300;--hi-soft:#3a3310;--red:#ef6a6f;--red-soft:#3a1c1e;--green:#6cc493;--green-soft:#173326;--amber:#e3ae45;--amber-soft:#3b2c0e;color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-block:0 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 main{max-width:1200px;margin:0 auto}
 header{padding:18px 0 6px}
-header .k{font:600 12px ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+header .k{font:600 12px ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);display:flex;justify-content:space-between;align-items:center;gap:12px}
+#b-theme{flex:none;font:600 13px system-ui,-apple-system,sans-serif;letter-spacing:0;text-transform:none;padding:6px 12px}
 h1{font-size:30px;line-height:1.1;margin:6px 0 8px;text-wrap:balance}
 h1 span{background:linear-gradient(transparent 62%,var(--hi) 62%)}
 header p{margin:0;color:var(--ink2);font-size:15.5px;max-width:70ch}
@@ -170,11 +172,15 @@ ol.need li{padding:4px 0}
   .paper .draft{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
+<script>
+/* Theme choice is shared with the team entry page: "light", "dark", or nothing = follow the device. */
+try{var th=localStorage.getItem("elwido-theme");if(th==="light"||th==="dark")document.documentElement.setAttribute("data-theme",th);}catch(e){}
+</script>
 </head>
 <body>
 <main>
 <header>
-  <div class="k">ELWIDO · просчёт заказа · пробный образец</div>
+  <div class="k"><span>ELWIDO · просчёт заказа · пробный образец</span><button type="button" class="ghost" id="b-theme" aria-label="Переключить тему">…</button></div>
   <h1>Просчёт <span>и предложение</span></h1>
   <p>Вводишь ведомость окон, страница считает цену завода, пошлину, себестоимость на объекте и цену клиенту. Внизу собирается черновик предложения на английском, его можно напечатать. Всё введённое сохраняется в этом браузере.</p>
 </header>
@@ -890,6 +896,16 @@ $("b-copy").addEventListener("click",function(){
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){msg.textContent="Скопировано. Вставь в письмо или документ.";},fallback);}
   else fallback();
 });
+
+/* theme: the button always offers the other one */
+(function(){
+  var root=document.documentElement,btn=$("b-theme"),mq=window.matchMedia?window.matchMedia("(prefers-color-scheme: dark)"):null;
+  function dark(){var t=root.getAttribute("data-theme");return t?t==="dark":!!(mq&&mq.matches);}
+  function label(){btn.textContent=dark()?"Светлая тема":"Тёмная тема";}
+  btn.addEventListener("click",function(){var t=dark()?"light":"dark";root.setAttribute("data-theme",t);try{localStorage.setItem("elwido-theme",t);}catch(e){}label();});
+  if(mq&&mq.addEventListener)mq.addEventListener("change",label);
+  label();
+})();
 
 all();
 window.ELWIDO_QUOTE={state:function(){return st;},totals:function(){return recalc();}};

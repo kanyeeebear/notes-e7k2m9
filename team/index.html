@@ -7,27 +7,42 @@
 <title>ELWIDO, инструменты</title>
 <style>
 /* Entry page for the factory team. Kept apart from the study pages on purpose: nothing here links back to them. */
-body{font:17px/1.5 system-ui,-apple-system,sans-serif;background:#f2f4f3;color:#1c2830;margin:0;padding:32px 20px}
+:root{--paper:#f2f4f3;--sheet:#fff;--ink:#1c2830;--ink2:#4b5a63;--rule:#cfd6d9}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#11171b;--sheet:#172026;--ink:#e3e9ec;--ink2:#a3b1b8;--rule:#2d3a42;color-scheme:dark}}
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{--paper:#11171b;--sheet:#172026;--ink:#e3e9ec;--ink2:#a3b1b8;--rule:#2d3a42;color-scheme:dark}
+body{font:17px/1.5 system-ui,-apple-system,sans-serif;background:var(--paper);color:var(--ink);margin:0;padding:32px 20px}
 main{max-width:560px;margin:0 auto}
-.k{font:600 12px ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:#4b5a63}
+.k{font:600 12px ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);display:flex;justify-content:space-between;align-items:center;gap:12px}
 h1{font-size:28px;margin:6px 0 20px}
-a{display:block;background:#fff;border:1px solid #cfd6d9;border-left:4px solid #f3c300;border-radius:4px;padding:16px 18px;margin:12px 0;color:#1c2830;text-decoration:none}
+a{display:block;background:var(--sheet);border:1px solid var(--rule);border-left:4px solid #f3c300;border-radius:4px;padding:16px 18px;margin:12px 0;color:var(--ink);text-decoration:none}
 a b{display:block;font-size:19px}
-a span{color:#4b5a63;font-size:15px}
-p{color:#4b5a63;font-size:14px}
-@media (prefers-color-scheme:dark){
-  body{background:#11171b;color:#e3e9ec}
-  a{background:#172026;border-color:#2d3a42;border-left-color:#f3c300;color:#e3e9ec}
-  a span,p,.k{color:#a3b1b8}
-}
+a span{color:var(--ink2);font-size:15px}
+p{color:var(--ink2);font-size:14px}
+button{flex:none;font:600 13px system-ui,-apple-system,sans-serif;border:1.5px solid var(--ink);background:var(--sheet);color:var(--ink);border-radius:5px;padding:6px 12px;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid #f3c300;outline-offset:2px}
 </style>
+<script>
+/* Theme choice is shared with the quote page: "light", "dark", or nothing = follow the device. */
+try{var th=localStorage.getItem("elwido-theme");if(th==="light"||th==="dark")document.documentElement.setAttribute("data-theme",th);}catch(e){}
+</script>
 </head>
 <body>
 <main>
-<div class="k">ELWIDO · США</div>
+<div class="k"><span>ELWIDO · США</span><button type="button" id="b-theme" aria-label="Переключить тему">…</button></div>
 <h1>Рабочие инструменты</h1>
 <a href="quote.html"><b>Просчёт заказа и предложение</b><span>Пробный образец. Ведомость окон, вес изделий, пошлина и доставка в США, цена клиенту и черновик предложения на английском. Ставки завода пока учебные.</span></a>
 <p>Редакция 24.11.2026. Всё, что вводится на странице, хранится только в браузере того, кто вводит.</p>
 </main>
+<script>
+(function(){
+  var root=document.documentElement,btn=document.getElementById("b-theme"),mq=window.matchMedia?window.matchMedia("(prefers-color-scheme: dark)"):null;
+  function dark(){var t=root.getAttribute("data-theme");return t?t==="dark":!!(mq&&mq.matches);}
+  function label(){btn.textContent=dark()?"Светлая тема":"Тёмная тема";}
+  btn.addEventListener("click",function(){var t=dark()?"light":"dark";root.setAttribute("data-theme",t);try{localStorage.setItem("elwido-theme",t);}catch(e){}label();});
+  if(mq&&mq.addEventListener)mq.addEventListener("change",label);
+  label();
+})();
+</script>
 </body>
 </html>
