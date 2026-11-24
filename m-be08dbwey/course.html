@@ -228,18 +228,93 @@ details.more>div{padding:0 16px 12px}
 .dim span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--paper);padding:0 8px;font:12px var(--f-mono)}
 </style>
 
+<style id="elwido-study-ui">
+/* Study navigation and the interactive window retain the drawing-sheet language. */
+body{margin:0;caret-color:var(--ink)}
+::selection{background:var(--hi);color:#1c2830}
+.topbar{background:#1c2830;color:#f2f4f3}
+.topbar .brand{color:#f2f4f3;text-decoration:none;display:flex;align-items:center;gap:.3em;min-height:44px}
+.topbar .iconbtn{color:#f2f4f3;min-height:44px;min-width:44px;border-color:#667780;border-radius:4px}
+.topbar .iconbtn:focus-visible{outline-color:#fff}
+.prog{color:#d9e2e6}
+.hero h1{line-height:1.06;text-wrap:balance}
+.hero h1 span{box-decoration-break:clone;-webkit-box-decoration-break:clone;padding-inline:.025em}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .hero h1 span{background:linear-gradient(transparent 90%,var(--hi) 90%)}}
+:root[data-theme="dark"] .hero h1 span{background:linear-gradient(transparent 90%,var(--hi) 90%)}
+.study-icon{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}
+#menuBtn{align-items:center;gap:8px}
+.study-home{display:flex;align-items:center;gap:8px;min-height:44px;font-size:14px;text-decoration:none;color:var(--ink);font-weight:600}
+.study-switch{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0 14px;padding-bottom:12px;border-bottom:1px solid var(--rule)}
+.study-switch a{display:flex;align-items:center;min-height:44px;padding:8px 10px;font-size:13px;color:var(--ink-2);border:1px solid transparent;border-radius:4px;text-decoration:none}
+.study-switch a[aria-current=page]{border-color:var(--rule);background:var(--sheet);color:var(--ink);font-weight:650}
+.study-switch a:hover{color:var(--ink);background:var(--rule-2)}
+.study-save{font-size:12px;line-height:1.5;color:var(--ink-2);padding:14px 8px 0;margin:0}
+.study-save[data-state=error]{color:var(--red)}
+.rail-search{min-height:44px}
+.btn,.btn.small,.fc-controls select{min-height:44px;height:auto;padding-block:10px}
+.chapter-end{gap:10px;flex-wrap:wrap}
+.window-lab{margin-top:26px;margin-bottom:32px;border:1px solid var(--rule);background:var(--sheet);border-radius:4px;overflow:hidden}
+.wl-head{padding:20px 22px 16px;border-bottom:1px solid var(--rule)}
+.chapter .wl-head h3{font:500 28px/1.15 var(--f-display);padding:0;border:0;margin:0 0 8px;text-transform:none}
+.chapter .wl-head p{font-size:15px;line-height:1.5;color:var(--ink-2);margin:0;max-width:56ch}
+.wl-tabs{display:flex;padding:0 22px;border-bottom:1px solid var(--rule);gap:24px}
+.wl-tabs button{appearance:none;border:0;border-bottom:3px solid transparent;background:transparent;color:var(--ink-2);font:600 14px var(--f-body);min-height:50px;padding:10px 0;cursor:pointer;border-radius:0}
+.wl-tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--hi)}
+.wl-body{display:grid;grid-template-columns:1.08fr 1fr;align-items:stretch}
+.wl-draw{position:relative;background:var(--paper);min-width:0;display:grid;align-content:center;padding:16px 10px}
+.wl-canvas{position:relative;aspect-ratio:490/560;max-width:390px;width:100%;margin:0 auto}
+.wl-canvas[hidden],.window-lab[hidden],.wl-parts button[hidden]{display:none!important}
+.wl-canvas>svg{display:block;width:100%;height:100%;color:var(--ink)}
+.wl-canvas>svg text{font-family:var(--f-mono);fill:var(--ink)}
+.wl-highlight{fill:none;stroke:var(--blue);stroke-width:4;opacity:0;pointer-events:none;transition:opacity .18s;vector-effect:non-scaling-stroke}
+.wl-highlight.is-active{opacity:1}
+.wl-canvas.wl-draining .wl-water{stroke-width:4!important;animation:wl-flow 1.8s linear infinite}
+@keyframes wl-flow{to{stroke-dashoffset:-32}}
+.wl-hotspot{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,-50%);display:grid;place-items:center;width:36px;height:36px;border:1.5px solid var(--ink);border-radius:50%;background:var(--sheet);color:var(--ink);font:600 13px var(--f-mono);cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.14)}
+.wl-hotspot:hover{background:var(--hi-soft)}
+.wl-hotspot[aria-pressed=true]{background:#f3c300;color:#1c2830;border-color:#1c2830}
+.wl-hotspot:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.wl-direction{position:absolute;top:0;left:8px;right:8px;display:flex;justify-content:space-between;font:11px var(--f-mono);color:var(--ink-2);pointer-events:none}
+.wl-info{border-left:1px solid var(--rule);padding:24px 22px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.wl-count{font:12px var(--f-mono);color:var(--ink-2);margin-bottom:14px}
+.chapter .wl-info h4{font:500 29px/1.1 var(--f-display);margin:0 0 8px}
+.wl-en{font:15px/1.4 var(--f-mono);color:var(--blue);margin-bottom:18px;overflow-wrap:anywhere}
+.chapter .wl-info p{font-size:15px;line-height:1.6;margin:0 0 18px}
+.wl-note{border-top:1px solid var(--rule);padding-top:16px;color:var(--ink-2);font-size:14px;line-height:1.55}
+.wl-note b{color:var(--ink);font-weight:600;display:block;margin-bottom:4px}
+.wl-next{display:flex;align-items:center;justify-content:space-between;gap:12px;font:600 14px var(--f-body);min-height:44px;padding:10px 0;margin-top:18px;background:transparent;border:0;border-top:1px solid var(--rule);color:var(--ink);cursor:pointer;text-align:left}
+.wl-next:hover{color:var(--blue)}
+.wl-parts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--rule);padding:8px;gap:4px}
+.wl-parts button{display:flex;align-items:center;gap:8px;min-height:44px;padding:10px 9px;background:transparent;border:1px solid transparent;border-radius:3px;color:var(--ink-2);font:14px/1.3 var(--f-body);text-align:left;cursor:pointer}
+.wl-parts button span{font:11px var(--f-mono);flex:none}
+.wl-parts button[aria-pressed=true]{border-color:var(--rule);background:var(--paper);color:var(--ink);font-weight:650}
+.wl-parts button:hover{background:var(--paper);color:var(--ink)}
+.wl-foot{font-size:12px;color:var(--ink-2);padding:10px 18px;border-top:1px solid var(--rule)}
+.wl-original{margin-top:20px;margin-bottom:24px}
+.wl-original>summary{font:600 14px var(--f-body);min-height:44px;padding:12px 0;cursor:pointer;color:var(--blue)}
+.wl-original .fig{margin:8px 0 0}
+@media(max-width:980px){#menuBtn{display:inline-flex}.wl-hotspot{width:44px;height:44px}}
+@media(max-width:720px){.wl-body{grid-template-columns:1fr}.wl-canvas{max-width:280px}.wl-info{border-left:0;border-top:1px solid var(--rule);padding:20px}.wl-draw{padding:18px 12px 12px}.wl-count{margin-bottom:8px}.chapter .wl-info h4{font-size:27px}.wl-en{margin-bottom:12px}.wl-head{padding:18px}.wl-tabs{padding:0 18px;gap:20px}.wl-parts{grid-template-columns:repeat(2,minmax(0,1fr))}.wl-info p{max-width:55ch}.wl-hotspot{width:44px;height:44px}.wl-next{margin-top:12px}.wl-note{padding-top:12px}}
+@media(max-width:520px){.topbar{gap:6px}.topbar .brand{font-size:15px}.prog-bar{width:32px}.topbar .grow{min-width:0}.topbar .iconbtn{padding-inline:8px}.wl-head,.wl-info{padding-inline:16px}}
+@media(prefers-reduced-motion:reduce){.wl-canvas.wl-draining .wl-water{animation:none}}
+@media print{.window-lab,.study-switch,.study-home,.study-save,#study-theme{display:none!important}.wl-original{display:block}.wl-original>summary{display:none}.wl-original>.fig{display:block!important}}
+</style>
+<script>try{var studyTheme=localStorage.getItem("elwido-theme");if(studyTheme==="light"||studyTheme==="dark")document.documentElement.setAttribute("data-theme",studyTheme);}catch(e){}</script>
 <a class="skip" href="#main">Перейти к материалу</a>
 <header class="topbar">
-  <button class="iconbtn" id="menuBtn" type="button" aria-label="Оглавление">☰ Листы</button>
-  <div class="brand">ELWIDO <b>Academy</b><span class="city"> · NYC</span></div>
+  <button class="iconbtn" id="menuBtn" type="button" aria-label="Оглавление" aria-controls="rail" aria-expanded="false"><svg class="study-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Листы</span></button>
+  <a class="brand" href="index.html" aria-label="ELWIDO: моё обучение">ELWIDO <b>Academy</b><span class="city"> · NYC</span></a>
   <div class="grow"></div>
+  <button type="button" class="iconbtn" id="study-theme" aria-label="Переключить тему"><svg class="study-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg></button>
   <div class="prog"><span class="prog-txt" id="progTxt">0 листов</span><span class="prog-bar"><i id="progBar"></i></span></div>
 </header>
 <div class="scrim" id="scrim"></div>
 <div class="shell">
   <nav class="rail" id="rail" aria-label="Оглавление курса">
+    <a class="study-home" href="index.html"><svg class="study-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Моё обучение</a><div class="study-switch" aria-label="Учебные материалы"><a href="baza.html">База</a><a href="course.html" aria-current="page">Academy</a><a href="factory.html">На заводе</a></div>
     <input class="rail-search" id="railSearch" type="search" placeholder="Поиск по курсу…" aria-label="Поиск по курсу">
     <div id="railList"></div>
+    <p class="study-save" id="study-save" role="status">Прогресс хранится на этом устройстве</p>
   </nav>
   <main id="main">
 
@@ -271,7 +346,7 @@ details.more>div{padding:0 16px 12px}
   </aside>
 
   <aside class="field"><b>Если времени мало</b>
-    <p>Рядом лежит короткая книга «ELWIDO База» (файл ELWIDO_Baza.html). В ней та же основа за 6 или 7 часов, с терминами на английском и разговором с клиентами. Начни с неё, а сюда возвращайся за глубиной, калькуляторами и шаблонами. Перед поездкой на завод прочитай лист «Визит на завод», он идёт сразу после этого.</p>
+    <p>Рядом лежит короткая книга «ELWIDO База» (файл <a href="baza.html">«База»</a>). В ней та же основа за 6 или 7 часов, с терминами на английском и разговором с клиентами. Начни с неё, а сюда возвращайся за глубиной, калькуляторами и шаблонами. Перед поездкой на завод прочитай лист «Визит на завод», он идёт сразу после этого.</p>
   </aside>
 
   <h3>Три уровня знания</h3>
@@ -337,7 +412,7 @@ details.more>div{padding:0 16px 12px}
     <div class="sheet-main">
       <div class="sheet-kicker">Перед поездкой</div>
       <h2>Визит на завод</h2>
-      <p class="lede">Карта цеха в Čakajovce: что стоит на каждой станции, как это называется по-английски, на что смотреть и кого о чём спросить. Прочитай до завода, а в цеху открой шпаргалку ELWIDO_Zavod.html.</p>
+      <p class="lede">Карта цеха в Čakajovce: что стоит на каждой станции, как это называется по-английски, на что смотреть и кого о чём спросить. Прочитай до завода, а в цеху открой шпаргалку <a href="factory.html">«День на заводе»</a>.</p>
     </div>
     <div class="sheet-tb"><div class="num">З</div>
       <dl><div><dt>Время</dt><dd>45 мин</dd></div><div><dt>Уровень</dt><dd>уметь</dd></div><div><dt>Ред.</dt><dd>23.11.26</dd></div></dl>
@@ -351,7 +426,7 @@ details.more>div{padding:0 16px 12px}
   </ul></div>
 
   <aside class="field"><b>В цеху открой шпаргалку</b>
-    <p>Этот лист читают до завода. В самом цеху удобнее файл «День на заводе» (ELWIDO_Zavod.html): 8 вещей, которые надо увидеть, 12 главных вопросов, что увезти, с галочками и заметками. Ниже те же темы разобраны подробно.</p>
+    <p>Этот лист читают до завода. В самом цеху удобнее файл «День на заводе» (<a href="factory.html">«День на заводе»</a>): 8 вещей, которые надо увидеть, 12 главных вопросов, что увезти, с галочками и заметками. Ниже те же темы разобраны подробно.</p>
   </aside>
 
   <h3>Если времени мало: главное <span class="tag g">уметь</span></h3>
@@ -1079,7 +1154,130 @@ details.more>div{padding:0 16px 12px}
   <h3>Фасад окна: названия частей <span class="tag g">уметь</span></h3>
   <p>Начни с вида окна целиком. Архитекторы называют такой чертёж <span class="en">elevation</span>. Ниже нарисовано учебное окно из нашего таунхауса: сверху глухая фрамуга, внизу слева глухое стекло, справа поворотно-откидная створка.</p>
 
-  <figure class="fig">
+
+<div class="window-lab" id="window-lab" hidden aria-label="Интерактивное устройство окна">
+ <div class="wl-head"><h3>Окно по деталям</h3><p>Выбери точку на схеме или название детали. Узнай, зачем она нужна и как называется по-английски.</p></div>
+ <div class="wl-tabs" role="tablist" aria-label="Вид схемы">
+  <button type="button" id="wl-tab-front" role="tab" aria-selected="true" aria-controls="wl-front" data-view="front">Вид спереди</button>
+  <button type="button" id="wl-tab-section" role="tab" aria-selected="false" aria-controls="wl-section" tabindex="-1" data-view="section">Разрез профиля</button>
+ </div>
+ <div class="wl-body">
+  <div class="wl-draw">
+   <div class="wl-canvas" id="wl-front" role="tabpanel" aria-labelledby="wl-tab-front">
+    <svg viewBox="115 35 490 560" role="img" aria-label="Учебное окно: глухая фрамуга сверху, слева глухое стекло, справа поворотно-откидная створка">
+      <rect x="160" y="70" width="400" height="500" style="fill:var(--alu);stroke:var(--ink);stroke-width:2"/>
+      <rect x="176" y="86" width="368" height="468" style="fill:var(--sheet);stroke:var(--ink);stroke-width:1"/>
+      <!-- transom & mullion -->
+      <rect x="176" y="176" width="368" height="16" style="fill:var(--alu);stroke:var(--ink);stroke-width:1"/>
+      <rect x="352" y="192" width="16" height="362" style="fill:var(--alu);stroke:var(--ink);stroke-width:1"/>
+      <!-- transom glass -->
+      <rect x="176" y="86" width="368" height="90" style="fill:var(--alu);stroke:none"/>
+      <rect x="182" y="92" width="356" height="78" style="fill:var(--blue-soft);stroke:var(--ink);stroke-width:1"/>
+      <text x="360" y="136" text-anchor="middle" style="font-size:11px;fill:var(--ink-2)">FIXED TRANSOM LITE · глухая фрамуга</text>
+      <!-- left fixed glass with bead -->
+      <rect x="176" y="192" width="176" height="362" style="fill:var(--alu);stroke:var(--ink);stroke-width:1"/>
+      <rect x="182" y="198" width="164" height="350" style="fill:var(--blue-soft);stroke:var(--ink);stroke-width:1"/>
+      <text x="264" y="372" text-anchor="middle" style="font-size:12px;font-weight:600">FIXED</text>
+      <text x="264" y="388" text-anchor="middle" style="font-size:11px;fill:var(--ink-2)">глухое стекло</text>
+      <!-- sash -->
+      <rect x="370" y="194" width="172" height="358" style="fill:var(--alu);stroke:var(--ink);stroke-width:1.5"/>
+      <rect x="386" y="210" width="140" height="326" style="fill:var(--sheet);stroke:var(--ink);stroke-width:1"/>
+      <rect x="390" y="214" width="132" height="318" style="fill:var(--blue-soft);stroke:var(--ink);stroke-width:1"/>
+      <!-- tilt-turn symbol: turn (apex at hinge side, left) -->
+      <path d="M522,214 L390,373 L522,532" style="fill:none;stroke:var(--ink);stroke-width:1;stroke-dasharray:6 4"/>
+      <!-- tilt (apex at bottom) -->
+      <path d="M390,214 L456,532 L522,214" style="fill:none;stroke:var(--ink);stroke-width:1;stroke-dasharray:2 3"/>
+      <!-- hinges & handle -->
+      <rect x="366" y="214" width="6" height="20" style="fill:var(--ink)"/>
+      <rect x="366" y="512" width="6" height="20" style="fill:var(--ink)"/>
+      <rect x="530" y="360" width="8" height="36" rx="2" style="fill:var(--ink)"/>
+      <rect x="526" y="362" width="4" height="10" style="fill:var(--ink)"/>
+      <!-- bead marker on sash glass edge -->
+      <rect x="386" y="210" width="140" height="4" style="fill:var(--hi);stroke:none"/>
+      <g aria-hidden="true">
+<path class="wl-highlight" data-hi="frame" d="M160 70h400v500H160z M176 86h368v468H176z"/>
+<rect class="wl-highlight" data-hi="sash" x="370" y="194" width="172" height="358"/>
+<rect class="wl-highlight" data-hi="mullion" x="352" y="192" width="16" height="362"/>
+<rect class="wl-highlight" data-hi="transom" x="176" y="176" width="368" height="16"/>
+<rect class="wl-highlight" data-hi="glass" x="182" y="198" width="164" height="350"/>
+<path class="wl-highlight" data-hi="hardware" d="M526 354h16v46h-16z M362 210h14v28h-14z M362 508h14v28h-14z"/>
+</g></svg><button type="button" class="wl-hotspot" data-part="frame" style="--x:10.8%;--y:57.1%" aria-label="Рама" aria-pressed="false">01</button><button type="button" class="wl-hotspot" data-part="sash" style="--x:70%;--y:48%" aria-label="Створка" aria-pressed="false">02</button><button type="button" class="wl-hotspot" data-part="mullion" style="--x:50%;--y:78%" aria-label="Вертикальный импост" aria-pressed="false">03</button><button type="button" class="wl-hotspot" data-part="transom" style="--x:50%;--y:26.6%" aria-label="Горизонтальный импост" aria-pressed="false">04</button><button type="button" class="wl-hotspot" data-part="glass" style="--x:28%;--y:49%" aria-label="Стеклопакет" aria-pressed="false">05</button><button type="button" class="wl-hotspot" data-part="hardware" style="--x:86%;--y:61%" aria-label="Фурнитура" aria-pressed="false">06</button>
+   </div>
+   <div class="wl-canvas" id="wl-section" role="tabpanel" aria-labelledby="wl-tab-section" hidden>
+    <div class="wl-direction"><span>СНАРУЖИ</span><span>ВНУТРИ</span></div>
+    <svg viewBox="165 20 490 560" role="img" aria-label="Вертикальный разрез низа окна: стеклопакет, алюминиевые части, терморазрыв и отвод воды"><defs>
+        <marker id="wl-dot2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5"><circle cx="5" cy="5" r="4" style="fill:var(--ink)"/></marker>
+        <marker id="wl-war" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--blue)"/></marker>
+        <marker id="wl-tick2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><line x1="1" y1="9" x2="9" y2="1" style="stroke:var(--ink);stroke-width:1.5"/></marker>
+        <pattern id="wl-pa" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" style="fill:var(--hi)"/><line x1="0" y1="0" x2="0" y2="5" style="stroke:var(--ink);stroke-width:.8"/></pattern>
+        <pattern id="wl-wall" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="10" style="stroke:var(--alu);stroke-width:1"/></pattern>
+      </defs>
+      <rect x="340" y="70" width="12" height="262" style="fill:var(--blue-soft);stroke:var(--ink);stroke-width:1.2"/>
+      <rect x="412" y="70" width="12" height="262" style="fill:var(--blue-soft);stroke:var(--ink);stroke-width:1.2"/>
+      <rect x="352" y="70" width="60" height="232" style="fill:var(--sheet);stroke:none"/>
+      <text x="382" y="160" text-anchor="middle" style="font-size:10.5px;fill:var(--ink-2)">газ</text>
+      <text x="382" y="174" text-anchor="middle" style="font-size:10.5px;fill:var(--ink-2)">Ar</text>
+      <!-- break line on top -->
+      <path d="M330,70 L350,64 L360,76 L380,64 L400,76 L420,64 L434,70" style="fill:none;stroke:var(--ink);stroke-width:1"/>
+      <!-- spacer + seals -->
+      <rect x="354" y="302" width="56" height="16" style="fill:var(--alu);stroke:var(--ink);stroke-width:1"/>
+      <rect x="352" y="318" width="60" height="14" style="fill:var(--ink-2);stroke:var(--ink);stroke-width:.8"/>
+      <!-- setting block -->
+      <rect x="342" y="334" width="80" height="8" style="fill:var(--ink);stroke:none"/>
+      <!-- sash exterior shell -->
+      <rect x="300" y="286" width="36" height="124" style="fill:var(--alu);stroke:var(--ink);stroke-width:1.5"/>
+      <rect x="306" y="350" width="24" height="54" style="fill:var(--sheet);stroke:var(--ink);stroke-width:.8"/>
+      <!-- sash rebate floor (exterior leg extension) -->
+      <rect x="336" y="342" width="92" height="6" style="fill:var(--alu);stroke:var(--ink);stroke-width:.8"/>
+      <!-- exterior glazing gasket -->
+      <rect x="334" y="292" width="6" height="18" style="fill:var(--ink)"/>
+      <!-- glazing bead + interior gasket -->
+      <rect x="428" y="292" width="20" height="50" style="fill:var(--alu);stroke:var(--ink);stroke-width:1.2"/>
+      <rect x="424" y="296" width="5" height="16" style="fill:var(--ink)"/>
+      <!-- sash interior shell -->
+      <rect x="428" y="348" width="56" height="62" style="fill:var(--alu);stroke:var(--ink);stroke-width:1.5"/>
+      <rect x="434" y="354" width="44" height="50" style="fill:var(--sheet);stroke:var(--ink);stroke-width:.8"/>
+      <!-- sash polyamide -->
+      <rect x="336" y="364" width="92" height="7" style="fill:url(#wl-pa);stroke:var(--ink);stroke-width:1"/>
+      <rect x="336" y="396" width="92" height="7" style="fill:url(#wl-pa);stroke:var(--ink);stroke-width:1"/>
+      <!-- frame exterior shell -->
+      <rect x="270" y="420" width="64" height="70" style="fill:var(--alu);stroke:var(--ink);stroke-width:1.5"/>
+      <rect x="276" y="426" width="52" height="58" style="fill:var(--sheet);stroke:var(--ink);stroke-width:.8"/>
+      <!-- frame interior shell -->
+      <rect x="430" y="420" width="70" height="70" style="fill:var(--alu);stroke:var(--ink);stroke-width:1.5"/>
+      <rect x="436" y="426" width="58" height="58" style="fill:var(--sheet);stroke:var(--ink);stroke-width:.8"/>
+      <!-- frame polyamide -->
+      <rect x="334" y="430" width="96" height="8" style="fill:url(#wl-pa);stroke:var(--ink);stroke-width:1"/>
+      <rect x="334" y="474" width="96" height="8" style="fill:url(#wl-pa);stroke:var(--ink);stroke-width:1"/>
+      <!-- frame up-stand for center gasket -->
+      <rect x="380" y="404" width="8" height="16" style="fill:var(--alu);stroke:var(--ink);stroke-width:.8"/>
+      <rect x="378" y="410" width="12" height="9" style="fill:var(--ink)"/>
+      <rect x="480" y="410" width="10" height="10" style="fill:var(--ink)"/>
+      <!-- weep slot -->
+      <rect x="266" y="470" width="8" height="8" style="fill:var(--sheet);stroke:var(--blue);stroke-width:1.2"/>
+      <!-- wall/subsill -->
+      <rect x="230" y="496" width="300" height="10" style="fill:var(--red-soft);stroke:var(--red);stroke-width:1"/>
+      <rect x="230" y="506" width="420" height="40" style="fill:url(#wl-wall);stroke:var(--ink);stroke-width:1"/>
+      <!-- drainage path -->
+      <path d="M338,312 L338,352 L318,356 L318,412 L300,440 L300,474 L262,474 L236,486" style="fill:none;stroke:var(--blue);stroke-width:2;stroke-dasharray:5 3" class="wl-water" marker-end="url(#wl-war)"/>
+      <g aria-hidden="true">
+<path class="wl-highlight" data-hi="thermal" d="M336 364h92v7h-92z M336 396h92v7h-92z M334 430h96v8h-96z M334 474h96v8h-96z"/>
+<path class="wl-highlight" data-hi="gasket" d="M332 290h10v22h-10z M422 294h9v20h-9z M376 407h16v15h-16z M478 408h14v14h-14z"/>
+<rect class="wl-highlight" data-hi="igu" x="338" y="70" width="88" height="272"/>
+<path class="wl-highlight" data-hi="drain" d="M338 312v40l-20 4v56l-18 28v34h-38l-26 12"/>
+</g></svg><button type="button" class="wl-hotspot" data-part="thermal" style="--x:44.3%;--y:75%" aria-label="Терморазрыв" aria-pressed="false">01</button><button type="button" class="wl-hotspot" data-part="gasket" style="--x:65.7%;--y:70.5%" aria-label="Уплотнители" aria-pressed="false">02</button><button type="button" class="wl-hotspot" data-part="igu" style="--x:44.3%;--y:32.1%" aria-label="Стеклопакет в разрезе" aria-pressed="false">03</button><button type="button" class="wl-hotspot" data-part="drain" style="--x:22.2%;--y:81.1%" aria-label="Отвод воды" aria-pressed="false">04</button>
+   </div>
+  </div>
+  <div class="wl-info">
+   <div id="wl-description" aria-live="polite" aria-atomic="true"><div class="wl-count" id="wl-count"></div><h4 id="wl-name"></h4><div class="wl-en" id="wl-en" lang="en"></div><p id="wl-text"></p><div class="wl-note"><b>Обрати внимание</b><span id="wl-note"></span></div></div>
+   <button class="wl-next" type="button">Следующая деталь<svg class="study-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+  </div>
+ </div>
+ <div class="wl-parts" role="group" aria-label="Детали окна"><button type="button" data-part="frame" data-view="front" aria-pressed="false"><span>01</span>Рама</button><button type="button" data-part="sash" data-view="front" aria-pressed="false"><span>02</span>Створка</button><button type="button" data-part="mullion" data-view="front" aria-pressed="false"><span>03</span>Вертикальный импост</button><button type="button" data-part="transom" data-view="front" aria-pressed="false"><span>04</span>Горизонтальный импост</button><button type="button" data-part="glass" data-view="front" aria-pressed="false"><span>05</span>Стеклопакет</button><button type="button" data-part="hardware" data-view="front" aria-pressed="false"><span>06</span>Фурнитура</button><button type="button" data-part="thermal" data-view="section" aria-pressed="false"><span>01</span>Терморазрыв</button><button type="button" data-part="gasket" data-view="section" aria-pressed="false"><span>02</span>Уплотнители</button><button type="button" data-part="igu" data-view="section" aria-pressed="false"><span>03</span>Стеклопакет в разрезе</button><button type="button" data-part="drain" data-view="section" aria-pressed="false"><span>04</span>Отвод воды</button></div>
+ <div class="wl-foot">Учебная схема. Пропорции разреза условные; конструкцию конкретной системы смотри в её каталоге.</div>
+</div>
+
+<details class="wl-original" open><summary>Чертёж со всеми подписями</summary>  <figure class="fig">
     <svg viewBox="0 0 760 640" role="img" aria-label="Фасад окна с подписями: рама, створка, импосты, штапик, фурнитура, верх, бок и низ рамы">
       <defs>
         <marker id="c02-dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5"><circle cx="5" cy="5" r="4" style="fill:var(--ink)"/></marker>
@@ -1159,7 +1357,7 @@ details.more>div{padding:0 16px 12px}
       <text x="132" y="175" text-anchor="end" style="font-size:11px;fill:var(--ink-2)">≈ 1524</text>
     </svg>
     <figcaption>Пунктир на створке условно показывает открывание. Длинный пунктир означает поворот (вершина треугольника смотрит на петли), короткий показывает откидывание сверху внутрь (вершина внизу, там створка держится при откидывании). Глухая фрамуга сверху называется transom lite.</figcaption>
-  </figure>
+  </figure></details>
 
   <div class="table-wrap"><table>
     <thead><tr><th>Термин</th><th>По-русски</th><th>Что важно продавцу</th></tr></thead>
@@ -6809,7 +7007,7 @@ window.GLOSSARY=[
   var KEY="elwido-academy-v2";
   var state={done:{},checks:{},quiz:{}};
   try{var raw=localStorage.getItem(KEY);if(raw){var s=JSON.parse(raw);state.done=s.done||{};state.checks=s.checks||{};state.quiz=s.quiz||{};}}catch(e){}
-  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+  function save(){var msg=document.getElementById("study-save");try{localStorage.setItem(KEY,JSON.stringify(state));if(msg){msg.textContent="Прогресс сохранён на этом устройстве";msg.removeAttribute("data-state");}}catch(e){if(msg){msg.textContent="Не удалось сохранить прогресс. Не закрывай страницу, пока не сохранишь нужные заметки.";msg.setAttribute("data-state","error");}}}
 
   /* number helpers shared with calculators */
   var nf0=new Intl.NumberFormat("ru-RU",{maximumFractionDigits:0});
@@ -6885,9 +7083,13 @@ window.GLOSSARY=[
     ch.appendChild(f);
   });
 
+
+  var lastStudyChapter="";
+  function rememberStudy(ch){if(!ch||lastStudyChapter===ch.id)return;lastStudyChapter=ch.id;try{localStorage.setItem("elwido-study-resume-v1",JSON.stringify({page:"course.html",chapter:ch.id,title:ch.getAttribute("data-short")||ch.querySelector("h2").textContent}));}catch(e){}}
+
   /* active chapter */
   if("IntersectionObserver" in window){
-    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){railLinks.forEach(function(a){a.classList.toggle("on",a.getAttribute("data-for")===e.target.id);});}});},{rootMargin:"-30% 0px -60% 0px"});
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){rememberStudy(e.target);railLinks.forEach(function(a){a.classList.toggle("on",a.getAttribute("data-for")===e.target.id);});}});},{rootMargin:"-30% 0px -60% 0px"});
     chapters.forEach(function(c){io.observe(c);});
   }
 
@@ -6983,4 +7185,52 @@ window.GLOSSARY=[
 
   renderProgress();
 })();
+</script>
+
+
+<script>
+
+(function(){
+  "use strict";
+  var lab=document.getElementById("window-lab");if(!lab)return;
+  var data={"frame": {"view": "front", "name": "Рама", "en": "Frame", "text": "Неподвижная часть окна. Крепится к стене и принимает створку или глухое остекление.", "note": "Не путай раму и створку: frame остаётся в проёме, sash открывается."}, "sash": {"view": "front", "name": "Створка", "en": "Sash / vent", "text": "Подвижная часть окна, в которой установлено стекло. В каталогах европейских систем её часто называют vent.", "note": "Размер и масса створки важны при выборе фурнитуры."}, "mullion": {"view": "front", "name": "Вертикальный импост", "en": "Mullion", "text": "Вертикальная стойка, которая разделяет окно на несколько полей. На схеме она находится между глухим стеклом и створкой.", "note": "Mullion идёт вертикально, transom — горизонтально."}, "transom": {"view": "front", "name": "Горизонтальный импост", "en": "Transom", "text": "Горизонтальная перекладина между полями окна. Здесь она отделяет верхнюю глухую фрамугу.", "note": "В разговоре transom может означать и окно над дверью: уточняй контекст."}, "glass": {"view": "front", "name": "Стеклопакет", "en": "Insulating glass unit · IGU", "text": "Несколько стёкол с герметичными камерами между ними. В раме или створке пакет удерживают штапик и уплотнители.", "note": "Толщина пакета и суммарная толщина стёкол — разные величины."}, "hardware": {"view": "front", "name": "Фурнитура", "en": "Hardware", "text": "Ручка, петли и запорные элементы. Они обеспечивают движение створки и её прижим к раме.", "note": "Поворотное и откидное открывание выполняет одна створка."}, "thermal": {"view": "section", "name": "Терморазрыв", "en": "Thermal break", "text": "Полиамидные планки соединяют наружную и внутреннюю алюминиевые части профиля и уменьшают передачу тепла между ними.", "note": "По-английски thermal bridge означает мостик холода, а не терморазрыв."}, "gasket": {"view": "section", "name": "Уплотнители", "en": "Gaskets", "text": "Уплотнители закрывают зазоры между деталями. На разрезе видны контуры у стекла и между рамой и створкой.", "note": "Средний уплотнитель работает как барьер для воды и ветра; внутренний добавляет плотность."}, "igu": {"view": "section", "name": "Стеклопакет в разрезе", "en": "IGU · spacer · setting block", "text": "Внизу пакета находятся дистанционная рамка и герметики. Пакет опирается на подкладки внутри профиля.", "note": "На этой схеме показаны два стекла. У тройного пакета три стекла и две камеры."}, "drain": {"view": "section", "name": "Отвод воды", "en": "Drainage / weep slots", "text": "Вода, прошедшая наружный контур, попадает в дренажную камеру и выходит наружу через прорези в профиле.", "note": "Дренажные прорези нельзя перекрывать герметиком."}},view="front",selected="frame",last={front:"frame",section:"thermal"};
+  function select(key){
+    var p=data[key];if(!p)return;selected=key;last[view]=key;
+    var list=Object.keys(data).filter(function(k){return data[k].view===view;});
+    document.getElementById("wl-count").textContent="Деталь "+(list.indexOf(key)+1)+" из "+list.length;
+    ["name","en","text","note"].forEach(function(f){document.getElementById("wl-"+f).textContent=p[f];});
+    lab.querySelectorAll("[data-part]").forEach(function(b){b.setAttribute("aria-pressed",b.getAttribute("data-part")===key?"true":"false");});
+    lab.querySelectorAll("[data-hi]").forEach(function(el){el.classList.toggle("is-active",el.getAttribute("data-hi")===key);});
+    document.getElementById("wl-section").classList.toggle("wl-draining",key==="drain");
+  }
+  function changeView(v){
+    view=v;
+    lab.querySelectorAll("[role=tab]").forEach(function(b){var on=b.getAttribute("data-view")===v;b.setAttribute("aria-selected",on?"true":"false");b.tabIndex=on?0:-1;});
+    ["front","section"].forEach(function(k){document.getElementById("wl-"+k).hidden=k!==v;});
+    lab.querySelectorAll(".wl-parts button").forEach(function(b){b.hidden=b.getAttribute("data-view")!==v;});
+    select(last[v]);
+  }
+  lab.querySelectorAll("[data-part]").forEach(function(b){b.addEventListener("click",function(){select(b.getAttribute("data-part"));});});
+  lab.querySelectorAll("[role=tab]").forEach(function(b){b.addEventListener("click",function(){changeView(b.getAttribute("data-view"));});b.addEventListener("keydown",function(e){if(["ArrowLeft","ArrowRight","Home","End"].indexOf(e.key)<0)return;e.preventDefault();var v=e.key==="Home"?"front":e.key==="End"?"section":view==="front"?"section":"front";changeView(v);document.getElementById("wl-tab-"+v).focus();});});
+  lab.querySelector(".wl-next").addEventListener("click",function(){var keys=Object.keys(data).filter(function(k){return data[k].view===view;});select(keys[(keys.indexOf(selected)+1)%keys.length]);});
+  changeView("front");lab.hidden=false;
+  var original=document.querySelector(".wl-original");if(original)original.open=false;
+  var beforePrint=false;
+  window.addEventListener("beforeprint",function(){if(original){beforePrint=original.open;original.open=true;}});
+  window.addEventListener("afterprint",function(){if(original)original.open=beforePrint;});
+})();
+
+(function(){
+  var root=document.documentElement,btn=document.getElementById("study-theme"),mq=window.matchMedia("(prefers-color-scheme:dark)");
+  function dark(){var t=root.getAttribute("data-theme");return t?t==="dark":mq.matches;}
+  function label(){btn.setAttribute("aria-label",dark()?"Светлая тема":"Тёмная тема");btn.title=btn.getAttribute("aria-label");}
+  btn.addEventListener("click",function(){var t=dark()?"light":"dark";root.setAttribute("data-theme",t);try{localStorage.setItem("elwido-theme",t);}catch(e){}label();});
+  if(mq.addEventListener)mq.addEventListener("change",label);label();
+  var menu=document.getElementById("menuBtn"),rail=document.getElementById("rail"),mobile=window.matchMedia("(max-width:980px)");
+  function menuState(){var open=document.body.classList.contains("menu");menu.setAttribute("aria-expanded",open?"true":"false");rail.inert=mobile.matches&&!open;}
+  new MutationObserver(menuState).observe(document.body,{attributes:true,attributeFilter:["class"]});
+  if(mobile.addEventListener)mobile.addEventListener("change",menuState);menuState();
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"&&document.body.classList.contains("menu")){document.body.classList.remove("menu");menu.focus();}});
+})();
+
 </script>

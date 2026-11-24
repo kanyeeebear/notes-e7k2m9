@@ -46,14 +46,20 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 ol{margin:6px 0 0;padding-left:22px}
 ol li{display:list-item;border:0;padding:3px 0}
 #all{display:none}
+
+.factory-back{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:8px;color:var(--ink);text-decoration:none;font-size:14px}
+.study-icon{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav a{min-height:44px;display:flex;align-items:center;padding-block:10px}
+li label{min-height:44px}button{min-height:44px}
 </style>
 </head>
 <body>
 <main>
+<a class="factory-back" href="index.html"><svg class="study-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Моё обучение</a>
 <header>
   <div class="k">ELWIDO · Čakajovce · шпаргалка на день</div>
   <h1>День <span>на заводе</span></h1>
-  <p>Отмечай галочкой, что увидел и спросил. Ответы пиши в заметки под каждым блоком: они сохраняются на этом телефоне. Подробности есть в «Базе», глава 06.</p>
+  <p>Отмечай галочкой, что увидел и спросил. Ответы пиши в заметки под каждым блоком: они сохраняются на этом телефоне. Подробности есть в <a href="baza.html#ch19">«Базе», глава 06</a>.</p>
 </header>
 
 <nav aria-label="Разделы">
@@ -217,3 +223,4 @@ ol li{display:list-item;border:0;padding:3px 0}
 </script>
 </body>
 </html>
+

@@ -214,6 +214,77 @@ ol.need li::marker{font-weight:700}
   .paper tr,.paper li,.paper .sign,.paper .blk{break-inside:avoid}
   .paper .draft{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+
+/* Working summary and progressive disclosure. Totals come from the existing calculation. */
+:root{--dock-height:112px}
+html{scroll-padding-bottom:calc(var(--dock-height) + 28px)}
+body{padding-bottom:calc(var(--dock-height) + 48px)}
+nav .brand{color:var(--ink);text-decoration:none;display:flex;align-items:center;min-height:44px}
+button,input:not([type=checkbox]),select{min-height:44px}
+#b-theme,button.x{width:44px;height:44px;min-height:44px}
+button.x{border-color:var(--rule)}
+.seg button{min-height:44px}
+.grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid label:nth-last-child(-n+2){min-width:0}
+label.check{min-height:44px;align-items:center}
+input,select,textarea{scroll-margin-block:88px calc(var(--dock-height) + 32px)}
+.row-detail{margin:4px 0 0;border:0;padding:0;background:transparent}
+.row-detail[open]{padding:0}
+.row-detail>summary{display:flex;align-items:center;gap:8px;min-height:44px;padding:8px 0;font-size:13px;font-weight:500;color:var(--ink2);list-style:none}
+.row-detail>summary::-webkit-details-marker{display:none}
+.row-detail>summary::before{content:"";display:block;width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);flex:none;margin-right:4px;transition:transform .16s}
+.row-detail[open]>summary::before{transform:rotate(45deg)}
+.row-detail>summary strong{font-weight:650;color:var(--ink)}
+.row-detail[open] .opt{padding:8px 0 12px}
+.row-detail .opt label{flex-direction:column;align-items:flex-start;gap:4px;white-space:normal;min-width:0}
+.row-detail .opt select{max-width:100%;min-width:0}
+.row-detail .opt input.n2,.row-detail .opt input.n3{width:80px}
+.row-detail .opt input.n4{width:150px}
+.row-detail+.notes:not(:empty){margin:4px 0 8px}
+.rates-settings{padding:0 18px;margin:14px 0 0}
+.rates-settings>summary{min-height:52px}
+.rates-settings[open]{padding-bottom:20px}
+.rates-settings>.sub{margin-top:4px}
+.quote-dock{position:fixed;z-index:20;left:50%;bottom:max(16px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:calc(100% - 48px);max-width:1200px;display:grid;grid-template-columns:minmax(150px,1.2fr) repeat(3,minmax(115px,1fr)) auto;align-items:center;gap:20px;padding:16px 22px;background:#1c2830;color:#f2f4f3;border:1px solid #4b5a63;border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.2)}
+.dock-context{min-width:0}
+.dock-context b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dock-mode{display:block;font-size:12px;color:#f7d84d;margin-top:3px}
+.dock-stat{margin:0;padding-left:20px;border-left:1px solid #52616b;min-width:0}
+.dock-stat dt{font-size:12px;color:#c9d3d8;margin:0 0 4px}
+.dock-stat dd{margin:0;font-size:23px;line-height:1.15;font-weight:700;white-space:nowrap;letter-spacing:-.01em}
+.dock-stat.price dd{color:#f7d84d}
+.dock-stat.margin.is-low dd{color:#ffca86}
+.dock-stat.margin.is-loss dd{color:#ffb4b8}
+.dock-link{display:flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:0 15px;background:#f3c300;color:#1c2830;border:1px solid #f3c300;border-radius:4px;font-size:14px;font-weight:700;text-decoration:none;white-space:nowrap}
+.dock-link:hover{background:#ffe169;border-color:#ffe169}
+.quote-dock :focus-visible{outline:2px solid #fff;outline-offset:4px}
+.dock-link svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8}
+.dock-message{grid-column:1/-1;color:#ffca86;font-size:13px;margin:-8px 0 0}
+.dock-message:empty{display:none}
+.save-state{font-size:13px;line-height:1.4;color:var(--ink2);margin:14px 0 0;min-height:19px}
+.save-state[data-state=error]{color:var(--red);font-weight:600}
+@media(max-width:1050px){.quote-dock{gap:14px;padding:14px 16px;grid-template-columns:repeat(3,minmax(0,1fr)) auto}.dock-context{display:none}.dock-stat{padding-left:14px}.dock-stat:first-of-type{padding-left:0;border:0}.dock-stat dd{font-size:21px}.dock-mode-mobile{display:block}}
+@media(min-width:1051px){.dock-mode-mobile{display:none}}
+@media(max-width:700px){
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .quote-dock{bottom:0;left:0;transform:none;width:100%;border-radius:0;border-width:1px 0 0;padding:12px max(16px,env(safe-area-inset-left,0px)) calc(12px + env(safe-area-inset-bottom,0px));gap:10px;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .dock-stat{padding-left:10px}.dock-stat dt{font-size:11px}.dock-stat dd{font-size:19px;white-space:normal;overflow-wrap:anywhere}
+  .dock-link{grid-column:3;min-height:34px;padding:0 6px;font-size:12px}
+  .dock-link .desktop-label{display:none}.dock-link .mobile-label{display:inline}
+  .dock-mode-mobile{grid-column:1/3;font-size:12px;color:#f7d84d;margin:0}
+  .dock-message{grid-row:3;margin:0;font-size:12px}
+  .row-detail>summary{font-size:13px;align-items:flex-start;padding-top:12px}
+  .row-detail>summary::before{margin-top:5px}
+  .row-detail .opt{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .row-detail .opt label:first-child,.row-detail .opt label:last-child{grid-column:1/-1}
+  .row-detail .opt select,.row-detail .opt input.n2,.row-detail .opt input.n3,.row-detail .opt input.n4{width:100%}
+}
+@media(min-width:701px){.dock-link .mobile-label{display:none}.dock-mode-mobile{grid-column:1/4;grid-row:2;margin:0 0 -6px}.dock-link{grid-column:4;grid-row:1/3}}
+@media(min-width:1051px){.dock-link{grid-column:5;grid-row:auto}}
+@media(max-width:420px){.grid{grid-template-columns:1fr}.dock-stat dd{font-size:18px}.brand{font-size:15px}nav{gap:8px}.links a{padding-left:8px;padding-right:8px}}
+@media(max-height:480px){.quote-dock{display:none}body{padding-bottom:40px}}
+@media print{.quote-dock,.save-state{display:none!important}body{padding-bottom:0}}
+
 </style>
 <script>
 /* Theme choice is shared with the team entry page: "light", "dark", or nothing = follow the device. */
@@ -223,7 +294,7 @@ try{var th=localStorage.getItem("elwido-theme");if(th==="light"||th==="dark")doc
 <body>
 <main>
 <nav aria-label="Разделы">
-  <b class="brand">ELWIDO</b>
+  <a class="brand" href="index.html" aria-label="ELWIDO: рабочие инструменты">ELWIDO</a>
   <div class="links"><a href="#job">Заказ</a><a href="#sch">Ведомость</a><a href="#rates">Ставки</a><a href="#landed">Пошлина</a><a href="#inst">Монтаж</a><a href="#price">Цена</a><a href="#prop">Предложение</a><a href="#need">От завода</a></div>
   <button type="button" id="b-theme" aria-label="Переключить тему"><svg class="ic i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg><svg class="ic i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.2A8 8 0 0 1 9.8 4a8 8 0 1 0 10.2 10.2z"/></svg></button>
 </nav>
@@ -252,6 +323,7 @@ try{var th=localStorage.getItem("elwido-theme");if(th==="light"||th==="dark")doc
     <label>Цвет и отделка<input type="text" data-b="p.finish" placeholder="Dark bronze"></label>
     <label>Стекло, описание для клиента<input type="text" data-b="p.glazing" placeholder="Triple insulating glass"></label>
   </div>
+  <p class="save-state" id="save-state" role="status" aria-live="polite"></p>
   <div class="bar">
     <button type="button" class="ghost" id="b-sample">Загрузить учебный заказ Park Slope</button>
     <button type="button" class="ghost" id="b-f22">Загрузить заказ Villa F22</button>
@@ -288,6 +360,8 @@ try{var th=localStorage.getItem("elwido-theme");if(th==="light"||th==="dark")doc
 
 <section id="rates">
   <h2>Ставки завода <small class="warn" id="r-tag">учебные</small></h2>
+  <details class="rates-settings" id="rates-panel">
+  <summary>Открыть ставки и настройки</summary>
   <p class="sub">Цена изделия равна ставке за м², умноженной на площадь по габариту, и округляется до целого. Все цифры ниже учебные, они подобраны под учебный заказ курса. Когда завод даст прайс, впиши его сюда: строки можно менять, добавлять и удалять.</p>
   <div class="grid" style="max-width:520px">
     <label>Валюта ставок<select data-b="cur"><option value="USD">USD, доллары</option><option value="EUR">EUR, евро</option></select></label>
@@ -310,6 +384,7 @@ try{var th=localStorage.getItem("elwido-theme");if(th==="light"||th==="dark")doc
   <h3>Подгонка по просчётам завода</h3>
   <div id="cal"></div>
   <p class="hint">Schüco есть в списке, потому что завод на этой системе работает. В текст для клиента названия систем не попадают: их добавляют после писем системодателей.</p>
+  </details>
 </section>
 
 <section id="landed">
@@ -419,6 +494,17 @@ try{var th=localStorage.getItem("elwido-theme");if(th==="light"||th==="dark")doc
   <p class="hint">Фрахт, брокера и доставку по Нью-Йорку завод не назовёт. Эти цифры дают перевозчик и таможенный брокер, ставку пошлины тоже подтверждает брокер.</p>
 </section>
 </main>
+
+<aside class="quote-dock np" aria-label="Текущий итог заказа">
+  <div class="dock-context"><b id="dock-project">Текущий заказ</b><span class="dock-mode" id="dock-mode">Учебные ставки</span></div>
+  <dl class="dock-stat"><dt>Затраты</dt><dd id="dock-cost">—</dd></dl>
+  <dl class="dock-stat price"><dt>Цена клиенту</dt><dd id="dock-price">—</dd></dl>
+  <dl class="dock-stat margin" id="dock-margin"><dt>Маржа</dt><dd id="dock-gm">—</dd></dl>
+  <span class="dock-mode-mobile" id="dock-mode-mobile">Учебные ставки</span>
+  <a class="dock-link" href="#price"><span class="desktop-label">К итогу заказа</span><span class="mobile-label">Итог</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  <p class="dock-message" id="dock-message"></p>
+</aside>
+
 
 <script>
 (function(){
@@ -555,7 +641,12 @@ try{var raw=localStorage.getItem(KEY);if(raw){var pr=JSON.parse(raw);if(pr&&pr.v
   if(oldRates){var have={};st.rates.forEach(function(x){have[x.id]=1;});defRates().forEach(function(x){if(!have[x.id])st.rates.push(x);});}
   st.rv=2;}}}catch(e){st=null;}
 if(!st)st=sample();
-function save(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
+function save(){
+  var el=$("save-state"),text,state;
+  try{localStorage.setItem(KEY,JSON.stringify(st));text="Сохранено на этом устройстве";state="saved";}
+  catch(e){text="Не удалось сохранить на устройстве. Оставь страницу открытой и скопируй предложение перед выходом.";state="error";}
+  if(el&&el.textContent!==text){el.textContent=text;el.setAttribute("data-state",state);}
+}
 
 function $(id){return document.getElementById(id);}
 function setT(id,t){var e=$(id);if(e)e.textContent=t;}
@@ -627,7 +718,7 @@ function rowNotes(r,c){
 }
 
 /* ---------- schedule table: one tbody per position, inputs on the first line, glass, bars, factory quote and checks on the second ---------- */
-var outs={};
+var outs={}, rowOpen={};
 function dimOut(mm){if(mm===""||mm==null||!isFinite(mm))return "";return String(st.unit==="in"?Math.round(mm/IN*1000)/1000:Math.round(mm*10)/10);}
 function rowEl(r){
   var tb=document.createElement("tbody"),tr=document.createElement("tr"),o={};
@@ -667,7 +758,10 @@ function rowEl(r){
   td("","c-del").appendChild(del);
 
   var tr2=document.createElement("tr"),c2=document.createElement("td"),box=document.createElement("div");
-  tr2.className="r2";c2.colSpan=12;box.className="opt";tr2.appendChild(c2);c2.appendChild(box);tb.appendChild(tr2);
+  tr2.className="r2";c2.colSpan=12;box.className="opt";tr2.appendChild(c2);tb.appendChild(tr2);
+  var detail=document.createElement("details"),summary=document.createElement("summary");
+  detail.className="row-detail";detail.open=!!rowOpen[r.id];detail.appendChild(summary);detail.appendChild(box);c2.appendChild(detail);o.detailSummary=summary;
+  detail.addEventListener("toggle",function(){rowOpen[r.id]=detail.open;});
   function lab(text){var l=document.createElement("label");l.appendChild(document.createTextNode(text));box.appendChild(l);return l;}
   var lg=lab("Стеклопакет"),gs=document.createElement("select");gs.setAttribute("aria-label","Стеклопакет");
   GLASS.forEach(function(x){var op=document.createElement("option");op.value=x.id;op.textContent=x.f+" · "+x.mm+" мм стекла";gs.appendChild(op);});
@@ -760,6 +854,12 @@ function recalc(){
     o.wt.title=w?"Стеклопакет "+mm0(c.pw)+" × "+mm0(c.ph)+" мм, "+num(c.glass,0)+" кг. Изделие целиком около "+num(c.unitKg,0)+" кг.":"";
     o.unit.innerHTML=isFinite(c.unit)?esc(money(c.unit))+(c.src==="act"?'<small class="tagf">по просчёту</small>':c.bars>0?"<small>шпросы "+esc(num(c.bars,1))+" м</small>":""):"…";
     o.tot.textContent=isFinite(c.line)&&c.a>0?money(c.line):"…";
+    if(o.detailSummary){
+      var glassLabel=c.g?c.g.f:num(c.gl,1)+" мм стекла";
+      var extra=(n(r.bv)||n(r.bh))?" · шпросы "+num(n(r.bv),0)+" × "+num(n(r.bh),0):"";
+      if(c.src==="act")extra+=" · цена завода введена";
+      o.detailSummary.innerHTML="<span>Стекло и дополнения: <strong>"+esc(glassLabel)+"</strong>"+esc(extra)+"</span>";
+    }
     o.notes.textContent="";
     notes.forEach(function(x){var li=document.createElement("li");li.className=x[0];li.textContent=x[1];o.notes.appendChild(li);});
   });
@@ -814,8 +914,17 @@ function recalc(){
     else if(diff>0.5){gb.classList.add("good");pm.classList.add("good");pm.textContent="Цена выше расчётной на "+money(diff)+", маржа "+pct(gm,1)+".";}
     else{gb.classList.add("good");pm.textContent="Цена равна расчётной: затраты, делённые на (1 − маржа).";}
   }
-  renderSum(T);renderProp(T);save();
+  renderSum(T);renderProp(T);renderDock(T,warn);save();
   return T;
+}
+function renderDock(T,warn){
+  var valid=T.ok&&!warn;
+  setT("dock-project",st.p.name||"Текущий заказ");
+  setT("dock-cost",valid?money(T.cost):"—");setT("dock-price",valid?money(T.price):"—");setT("dock-gm",valid?pct(T.gm,1):"—");
+  var label=st.confirmed?"Ставки подтверждены":"Учебные ставки";
+  setT("dock-mode",label);setT("dock-mode-mobile",label);
+  var g=$("dock-margin");g.classList.toggle("is-loss",valid&&T.gp<0);g.classList.toggle("is-low",valid&&T.gp>=0&&T.gm<n(st.m.target)-0.05);
+  setT("dock-message",warn?"Расчёт неполный. Проверь ставки и строки без цены.":T.ok&&T.gp<0?"Цена ниже затрат. Проверь итог заказа.":!T.ok?"Добавь изделия в ведомость, чтобы увидеть итог.":"");
 }
 function renderSum(T){
   var tb=$("sumb");tb.textContent="";
@@ -965,9 +1074,18 @@ $("b-copy").addEventListener("click",function(){
   as.forEach(function(a){var t=document.getElementById(a.getAttribute("href").slice(1));if(t)io.observe(t);});
 })();
 
-all();
+/* A section link opens the settings it points to; closed rows keep their warnings visible. */
+document.querySelector('a[href="#rates"]').addEventListener("click",function(){$("rates-panel").open=true;});
+if(location.hash==="#rates")$("rates-panel").open=true;
+$("rates-panel").addEventListener("toggle",function(){this.querySelector("summary").textContent=this.open?"Скрыть ставки и настройки":"Открыть ставки и настройки";});
+var dock=document.querySelector(".quote-dock");
+function sizeDock(){document.documentElement.style.setProperty("--dock-height",dock.offsetHeight+"px");}
+if("ResizeObserver" in window)new ResizeObserver(sizeDock).observe(dock);else window.addEventListener("resize",sizeDock);
+
+all();sizeDock();
 window.ELWIDO_QUOTE={state:function(){return st;},totals:function(){return recalc();}};
 })();
 </script>
 </body>
 </html>
+
