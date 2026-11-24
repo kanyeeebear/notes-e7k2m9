@@ -6,10 +6,10 @@
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="theme-color" content="#f2f4f3">
 <title>3D-окно · ELWIDO</title>
-<link rel="stylesheet" href="../assets/window-3d.css">
+<link rel="stylesheet" href="../assets/window-3d.css?v=3">
 <script>try{var theme=localStorage.getItem('elwido-theme');if(theme==='light'||theme==='dark')document.documentElement.dataset.theme=theme;}catch(e){}</script>
 </head>
-<body>
+<body data-view="window">
 <a class="skip" href="#settings">К параметрам окна</a>
 <div class="app">
   <nav class="topbar" aria-label="ELWIDO">
@@ -18,23 +18,36 @@
     <button class="icon-button theme-button" id="theme-toggle" type="button" aria-label="Переключить тему"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg></button>
   </nav>
   <header class="intro">
-    <div><h1>Окно <span>в твоих руках</span></h1><p>Поверни модель. Подбери размеры и стекло. Посмотри, как работает створка.</p></div>
+    <div><h1>Окно <span>в твоих руках</span></h1><p>Настрой окно. Рассмотри 3D-срез и получи чертёж с размерами.</p></div>
     <span class="study-label">Учебная модель</span>
   </header>
   <main class="workbench">
     <section class="viewer-column" aria-label="Трёхмерное окно">
-      <div class="viewer" id="viewer" aria-busy="true">
+      <div class="workspace-tabs" role="tablist" aria-label="Представление окна" id="workspace-tabs" inert>
+        <button type="button" role="tab" id="tab-window" data-view="window" aria-selected="true" aria-controls="viewer">Окно 3D</button>
+        <button type="button" role="tab" id="tab-section" data-view="section" aria-selected="false" aria-controls="viewer" tabindex="-1">Срез 3D</button>
+        <button type="button" role="tab" id="tab-drawing" data-view="drawing" aria-selected="false" aria-controls="viewer" tabindex="-1">Чертёж</button>
+      </div>
+      <div class="viewer" id="viewer" aria-busy="true" role="tabpanel" aria-labelledby="tab-window">
         <div class="viewer-tools" role="group" aria-label="Вид на окно" inert>
           <button class="view-button" type="button" data-camera="inside" aria-pressed="false">Из комнаты</button>
           <button class="view-button" type="button" data-camera="outside" aria-pressed="false">С улицы</button>
           <button class="icon-button reset-view" type="button" id="reset-view" aria-label="Вернуть исходный ракурс" title="Вернуть исходный ракурс"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 2 8M4 4v6h6"/></svg></button>
         </div>
         <div class="canvas-mount" id="canvas-mount"></div>
+        <div id="drawing-screen" class="drawing-screen" hidden></div>
         <div class="dimension" id="dimension-width" aria-hidden="true"></div>
         <div class="dimension" id="dimension-height" aria-hidden="true"></div>
+        <div class="dimension orientation-label" id="label-exterior" aria-hidden="true" hidden>Снаружи</div>
+        <div class="dimension orientation-label" id="label-interior" aria-hidden="true" hidden>Внутри</div>
         <div class="loading" id="loading" role="status"><span class="loading-mark"></span><span>Собираю окно…</span></div>
         <div class="viewer-error" id="viewer-error" role="alert" hidden><strong>Не удалось открыть 3D</strong><p>Обнови страницу. Если модель не появится, открой её в браузере с поддержкой WebGL.</p><button type="button" id="retry">Обновить страницу</button></div>
         <div class="viewer-caption"><span class="status-dot" aria-hidden="true"></span><span id="opening-caption">Створка закрыта</span><span class="view-hint">Потяни, чтобы вращать</span></div>
+      </div>
+      <div class="drawing-actions" id="drawing-actions" hidden>
+        <button type="button" class="drawing-export primary" id="print-drawing">Печать / PDF</button>
+        <button type="button" class="drawing-export" id="download-dxf">Скачать DXF</button>
+        <span>W-01 · эскиз, не для производства</span>
       </div>
       <div class="model-strip" aria-label="Текущая конструкция">
         <div><span>Габарит рамы</span><strong id="size-summary">1 200 × 1 500 мм</strong></div>
@@ -44,6 +57,17 @@
       <p class="viewer-help"><span class="desktop-help">Мышью вращай окно, колёсиком меняй масштаб. С клавиатуры: стрелки вращают модель, + и − приближают и отдаляют.</span><span class="mobile-help">Один палец вращает окно, два пальца меняют масштаб.</span></p>
     </section>
     <aside class="settings" id="settings" aria-label="Параметры окна" inert>
+      <section class="section-inspector setting-group" id="section-inspector" hidden aria-label="Детали среза">
+        <h2>Нижний узел окна</h2>
+        <p class="control-note">Фрагмент закрытого окна. Стеклопакет соответствует выбранному варианту.</p>
+        <label for="section-part">Выделить деталь</label>
+        <select id="section-part"><option value="all">Весь узел</option><option value="profile">Алюминиевый профиль</option><option value="thermal">Терморазрыв</option><option value="glass">Стеклопакет</option><option value="seals">Уплотнения</option><option value="bead">Штапик</option></select>
+        <p class="section-description" id="section-description" aria-live="polite"></p>
+      </section>
+      <section class="drawing-inspector setting-group" id="drawing-inspector" hidden>
+        <h2>Эскиз W-01</h2><p class="control-note">Измени размеры или сторону петель: чертёж обновится. На печатном листе будут оба вида и состав стеклопакета.</p>
+        <p class="control-note">Размеры относятся к раме целиком. Производственные размеры стекла и профилей здесь не рассчитываются.</p>
+      </section>
       <fieldset class="setting-group opening-group">
         <legend>Открой створку</legend>
         <div class="opening-options" role="group" aria-label="Режим открывания">
@@ -85,11 +109,12 @@
   <p class="sr-only" id="model-announcement" role="status" aria-live="polite"></p>
   <noscript><p>Чтобы вращать и настраивать окно, включи JavaScript в браузере.</p></noscript>
 </div>
+<section class="print-sheet" id="print-sheet" aria-label="Эскиз для печати"></section>
 <script>
 document.getElementById('retry').addEventListener('click',function(){location.reload();});
 </script>
 <script type="module">
-import('../assets/window-3d.js?v=2').then(module=>module.start()).catch(error=>{
+import('../assets/window-3d.js?v=3').then(module=>module.start()).catch(error=>{
   console.error('ELWIDO 3D:',error);
   document.getElementById('loading').hidden=true;
   document.getElementById('viewer-error').hidden=false;

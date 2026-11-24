@@ -7,6 +7,11 @@ export const GLASS = Object.freeze({
 });
 export const LIMITS = Object.freeze({width:[600,1600], height:[800,2400]});
 export const DEFAULTS = Object.freeze({width:1200,height:1500,glass:'triple44',hinge:'left'});
+// Shared educational profile dimensions, in metres. Not a manufacturer's section.
+export const PROFILE = Object.freeze({wall:.0022,sashOffset:.052,sashFace:.058,glassInset:.105,glassOutsideZ:.002,
+  frameOuter:{face:.066,z:-.041,depth:.027},frameInner:{face:.050,z:.014,depth:.027},
+  sashOuter:{face:.058,z:.002,depth:.022},sashInner:{face:.058,z:.042,depth:.026},
+  strips:[[.008,.012],[.042,.046]]});
 
 export function glassThickness(key){
   const g=GLASS[key];
@@ -74,21 +79,30 @@ export function buildWindow(params,materials){
   function ring(parent,w,h,face,depth,z,mat,name,bevel=.001){return addMesh(parent,ringGeometry(w,h,face,depth,bevel),mat,name,0,0,z,true);}
   function box(parent,w,h,d,x,y,z,mat,name){return addMesh(parent,new THREE.BoxGeometry(w,h,d),mat,name,x,y,z);}
 
-  ring(fixed,width,height,.066,.027,-.041,materials.aluminum,'Exterior frame shell');
-  ring(fixed,width-.012,height-.012,.050,.028,-.014,materials.thermal,'Frame thermal break',0);
-  ring(fixed,width,height,.072,.027,.014,materials.aluminum,'Interior frame shell');
-  ring(fixed,sw+.006,sh+.006,.006,.007,.039,materials.rubber,'Frame weather seal',0);
+  function hollowRing(parent,w,h,face,depth,z,mat,name){
+    const t=PROFILE.wall,g=new THREE.Group();g.name=name;parent.add(g);
+    ring(g,w,h,face,t,z,mat,name+' back',0);
+    ring(g,w,h,face,t,z+depth-t,mat,name+' front',0);
+    ring(g,w,h,t,depth-2*t,z+t,mat,name+' outer wall',0);
+    ring(g,w-2*(face-t),h-2*(face-t),t,depth-2*t,z+t,mat,name+' inner wall',0);
+  }
+
+  hollowRing(fixed,width,height,PROFILE.frameOuter.face,PROFILE.frameOuter.depth,PROFILE.frameOuter.z,materials.aluminum,'Exterior frame shell');
+  hollowRing(fixed,width,height,PROFILE.frameInner.face,PROFILE.frameInner.depth,PROFILE.frameInner.z,materials.aluminum,'Interior frame shell');
+  PROFILE.strips.forEach(([a,b])=>ring(fixed,width-2*a,height-2*a,b-a,.028,-.014,materials.thermal,'Frame thermal strip',0));
+  ring(fixed,width-.100,height-.100,.002,.011,.035,materials.rubber,'Frame weather seal',0);
   ring(fixed,width-.020,height-.020,.015,.005,.041,materials.bead,'Frame reveal');
 
-  ring(sash,sw,sh,.058,.022,-.018,materials.aluminum,'Exterior sash shell');
-  ring(sash,sw-.008,sh-.008,.047,.018,.004,materials.thermal,'Sash thermal break',0);
-  ring(sash,sw,sh,.058,.026,.022,materials.aluminum,'Interior sash shell');
-  ring(sash,sw-.100,sh-.100,.012,.010,.029,materials.bead,'Glazing bead');
-  ring(sash,sw-.121,sh-.121,.003,.003,.027,materials.rubber,'Inner glazing gasket',0);
-  ring(sash,sw-.112,sh-.112,.004,.003,-.020,materials.rubber,'Outer glazing gasket',0);
+  hollowRing(sash,sw,sh,.058,.022,-.018,materials.aluminum,'Exterior sash shell');
+  hollowRing(sash,sw,sh,.058,.026,.022,materials.aluminum,'Interior sash shell');
+  PROFILE.strips.forEach(([a,b])=>ring(sash,sw-2*a,sh-2*a,b-a,.018,.004,materials.thermal,'Sash thermal strip',0));
 
   const gw=sw-.106,gh=sh-.106,total=glassThickness(params.glass)/1000;
-  let z=.026-total;
+  const glassBack=PROFILE.glassOutsideZ-.020,glassFront=glassBack+total;
+  ring(sash,sw-.100,sh-.100,.012,.010,glassFront+.003,materials.bead,'Glazing bead');
+  ring(sash,sw-.121,sh-.121,.003,.003,glassFront+.001,materials.rubber,'Inner glazing gasket',0);
+  ring(sash,sw-.112,sh-.112,.004,.003,glassBack-.003,materials.rubber,'Outer glazing gasket',0);
+  let z=glassBack;
   glazing.panes.forEach((mm,index)=>{
     const thickness=mm/1000;
     const pane=addMesh(glassGroup,new THREE.BoxGeometry(gw,gh,thickness),materials.glass,'Glass pane '+(index+1),0,0,z+thickness/2);
@@ -97,6 +111,7 @@ export function buildWindow(params,materials){
     z+=thickness;
     if(index<glazing.gaps.length){const gap=glazing.gaps[index]/1000;ring(glassGroup,gw-.004,gh-.004,.006,gap,z,materials.spacer,'Spacer '+(index+1),0);z+=gap;}
   });
+  for(const x of [-gw/4,gw/4])box(glassGroup,.060,.004,total,x,-gh/2-.002,glassBack+total/2,materials.rubber,'Glazing setting block');
 
   const hingeX=(params.hinge==='left'?-1:1)*sw/2,hingeZ=.066;
   for(const y of [-sh/2+.16,sh/2-.16]){
