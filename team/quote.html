@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>ELWIDO Просчёт</title>
+<style>
+/* Trial quoting sheet: window schedule in, factory budget + landed cost + client price + printable English proposal out.
+   Standalone on purpose (no build step), same look as ELWIDO_Zavod.html. All state lives in localStorage. */
+:root{--paper:#f2f4f3;--sheet:#fff;--ink:#1c2830;--ink2:#4b5a63;--rule:#cfd6d9;--hi:#f3c300;--hi-soft:#fff3bf;--red:#c2272d;--red-soft:#fbe9e9;--green:#2e7d4f;--green-soft:#e5f3ea;--amber:#8a5a00;--amber-soft:#ffecc7}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#11171b;--sheet:#172026;--ink:#e3e9ec;--ink2:#a3b1b8;--rule:#2d3a42;--hi:#f3c300;--hi-soft:#3a3310;--red:#ef6a6f;--red-soft:#3a1c1e;--green:#6cc493;--green-soft:#173326;--amber:#e3ae45;--amber-soft:#3b2c0e;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#11171b;--sheet:#172026;--ink:#e3e9ec;--ink2:#a3b1b8;--rule:#2d3a42;--hi:#f3c300;--hi-soft:#3a3310;--red:#ef6a6f;--red-soft:#3a1c1e;--green:#6cc493;--green-soft:#173326;--amber:#e3ae45;--amber-soft:#3b2c0e;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-block:0 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:1200px;margin:0 auto}
+header{padding:18px 0 6px}
+header .k{font:600 12px ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+h1{font-size:30px;line-height:1.1;margin:6px 0 8px;text-wrap:balance}
+h1 span{background:linear-gradient(transparent 62%,var(--hi) 62%)}
+header p{margin:0;color:var(--ink2);font-size:15.5px;max-width:70ch}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);display:flex;gap:6px;overflow-x:auto;padding:10px 0;margin:6px 0 4px;border-bottom:1px solid var(--rule)}
+nav a{flex:none;font:600 13px ui-monospace,Menlo,monospace;color:var(--ink);text-decoration:none;border:1px solid var(--rule);border-radius:999px;padding:7px 12px;background:var(--sheet)}
+section{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;margin:14px 0;padding:16px 16px 14px;scroll-margin-top:64px}
+h2{font-size:20px;margin:0 0 4px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+h2 small{font:600 12px ui-monospace,Menlo,monospace;color:var(--ink2);white-space:nowrap}
+h2 small.warn{color:var(--red)}
+h3{font-size:16px;margin:18px 0 6px}
+.sub{color:var(--ink2);font-size:15px;margin:0 0 10px;max-width:86ch}
+.hint{color:var(--ink2);font-size:14px;margin:10px 0 0;max-width:86ch}
+.goal{background:var(--hi-soft);border-left:4px solid var(--hi)}
+.goal p{margin:0;max-width:86ch}
+.en{font-family:ui-monospace,Menlo,monospace;font-size:.86em;background:var(--paper);padding:1px 5px;border-radius:3px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px 14px}
+label{display:flex;flex-direction:column;justify-content:flex-end;font-size:13.5px;color:var(--ink2)}
+label.wide{grid-column:1/-1}
+input,select,textarea{display:block;width:100%;margin-top:3px;border:1px solid var(--rule);border-radius:5px;background:var(--paper);color:var(--ink);font:16px/1.35 system-ui,-apple-system,sans-serif;padding:7px 9px}
+textarea{min-height:120px;resize:vertical;font-size:15px}
+input[type=number]{-moz-appearance:textfield;appearance:textfield;font-variant-numeric:tabular-nums}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+label.check{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--ink);margin:10px 0 0;cursor:pointer}
+label.check input{flex:none;width:22px;height:22px;margin:1px 0 0;accent-color:var(--green)}
+button{font:600 15px system-ui,-apple-system,sans-serif;border:1.5px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:5px;padding:9px 14px;cursor:pointer}
+button.ghost{background:var(--sheet);color:var(--ink)}
+button.x{border:1px solid var(--rule);background:transparent;color:var(--ink2);padding:5px 9px;font-size:15px;line-height:1.2}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0;align-items:center}
+.seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:5px;overflow:hidden;margin:0 0 10px}
+.seg button{border:0;border-radius:0;background:var(--sheet);color:var(--ink);padding:6px 14px;font-size:14px}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th{font:600 11.5px ui-monospace,Menlo,monospace;letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);text-align:left;padding:6px 5px;border-bottom:1.5px solid var(--ink);vertical-align:bottom}
+td{padding:6px 5px;border-bottom:1px dotted var(--rule);vertical-align:middle;font-size:15px}
+td input,td select{margin:0;padding:6px 7px;font-size:15px}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+th.num{text-align:right}
+td small{display:block;color:var(--ink2);font-size:12px;line-height:1.25}
+.sch .c-mark{min-width:112px}.sch .c-type{min-width:140px}.sch .c-sys{min-width:226px}
+.sch .c-wt{white-space:normal;min-width:150px}
+.sch .c-dim{width:84px}.sch .c-s{width:62px}.sch .c-del{width:38px}
+.sch tr.r1 td{border-bottom:0;padding-bottom:3px}
+.sch tr.r2 td{padding-top:0;padding-bottom:10px}
+.opt{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
+.opt label{flex-direction:row;align-items:center;gap:6px;font-size:13px;white-space:nowrap}
+.opt select,.opt input{width:auto;margin:0;padding:4px 7px;font-size:14px}
+.opt input.n2{width:48px}.opt input.n3{width:62px}.opt input.n4{width:92px}
+.notes{list-style:none;margin:0;padding:0;display:grid;gap:3px;max-width:86ch}
+.opt+.notes:not(:empty){margin-top:7px}
+.notes li{font-size:13.5px;line-height:1.4;padding:4px 10px;border-left:3px solid var(--rule);background:var(--paper);border-radius:0 4px 4px 0}
+.notes li.w{border-left-color:var(--amber);background:var(--amber-soft)}
+.notes li.b{border-left-color:var(--red);background:var(--red-soft)}
+#s-tips:not(:empty){margin-top:10px}
+.sch th,.sch td{padding-left:4px;padding-right:4px}
+.pill{display:inline-block;border-radius:999px;padding:1px 9px;font-weight:600;background:var(--green-soft);color:var(--green)}
+.pill.a{background:var(--amber-soft);color:var(--amber)}
+.pill.r{background:var(--red-soft);color:var(--red)}
+.tagf{font:600 10.5px ui-monospace,Menlo,monospace;text-transform:uppercase;color:var(--green);letter-spacing:.04em}
+.sum td{font-size:15px}
+.sum tr.b td{font-weight:650;border-bottom:1px solid var(--rule);background:var(--paper)}
+.sum tr.key td{font-weight:700;background:var(--hi-soft);border-bottom:1px solid var(--hi)}
+
+.outs{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:12px}
+.out{border:1px solid var(--rule);border-radius:5px;padding:9px 11px;background:var(--paper);min-width:0}
+.out b{display:block;font-size:21px;line-height:1.25;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.out span{font-size:13px;color:var(--ink2)}
+.out.key{background:var(--hi-soft);border-color:var(--hi)}
+.out.bad{background:var(--red-soft);border-color:var(--red)}
+.out.mid{background:var(--amber-soft);border-color:var(--amber)}
+.out.good{background:var(--green-soft);border-color:var(--green)}
+.msg{font-size:14.5px;margin:10px 0 0;padding:9px 12px;border-radius:5px;background:var(--paper);border-left:4px solid var(--rule);max-width:86ch}
+.msg.bad{background:var(--red-soft);border-left-color:var(--red)}
+.msg.mid{background:var(--amber-soft);border-left-color:var(--amber)}
+.msg.good{background:var(--green-soft);border-left-color:var(--green)}
+.msg:empty{display:none}
+#cal table{margin-top:6px}
+details{margin:10px 0 0;border:1px solid var(--rule);border-radius:5px;padding:0 12px}
+details[open]{padding-bottom:12px}
+summary{cursor:pointer;font-weight:600;padding:10px 0}
+ol.need{margin:6px 0 0;padding-left:22px;max-width:86ch}
+ol.need li{padding:4px 0}
+#status{font-size:14px;color:var(--green);min-height:20px;margin-top:8px}
+#copybox{display:none;margin-top:10px;min-height:160px}
+
+/* The proposal is a paper document: it stays light in both themes and is the only thing that prints. */
+.paper{background:#fff;color:#16202a;border:1px solid #cfd6d9;border-radius:4px;max-width:840px;margin:16px auto 0;padding:38px 42px;font:14.5px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.paper .empty{color:#4b5a63;margin:0}
+.paper .draft{border:1.5px dashed #c2272d;color:#c2272d;background:#fbe9e9;font:700 12.5px ui-monospace,Menlo,monospace;letter-spacing:.04em;padding:8px 12px;border-radius:4px;margin:0 0 20px;text-align:center}
+.paper .ph{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;border-bottom:2px solid #16202a;padding-bottom:14px;margin-bottom:16px}
+.paper .brand{font-size:28px;font-weight:800;letter-spacing:.06em;line-height:1}
+.paper .tagl{font-size:12.5px;color:#4b5a63;margin-top:6px}
+.paper .pt{text-align:right;font-size:13px;color:#4b5a63}
+.paper .doc{font-size:18px;font-weight:700;color:#16202a;text-transform:uppercase;letter-spacing:.05em}
+.paper dl{display:grid;grid-template-columns:max-content 1fr;gap:3px 16px;margin:0 0 14px}
+.paper dt{color:#4b5a63}.paper dd{margin:0}
+.paper h3{font-size:13px;text-transform:uppercase;letter-spacing:.07em;margin:20px 0 6px;color:#16202a;break-after:avoid}
+.paper p{margin:0 0 8px}
+.paper table{width:100%;border-collapse:collapse;margin:4px 0 10px}
+.paper th{font:600 11px ui-monospace,Menlo,monospace;color:#4b5a63;border-bottom:1.5px solid #16202a;padding:5px 6px}
+.paper td{font-size:14px;border-bottom:1px solid #dfe5e7;padding:6px;vertical-align:top}
+.paper td .mm{display:block;color:#4b5a63;font-size:12px}
+.paper td .msz{display:none}
+.paper .scope td:first-child{white-space:nowrap}
+.paper tr.t td{font-weight:700;border-bottom:1.5px solid #16202a}
+.paper table.price td{border-bottom:1px solid #dfe5e7}
+.paper table.price tr.t td{border-top:1.5px solid #16202a;border-bottom:0}
+.paper ul{margin:0 0 8px;padding-left:20px}
+.paper li{padding:1px 0}
+.paper .two{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+.paper .sign{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:34px;color:#4b5a63;font-size:13px}
+.paper .sign div{border-top:1px solid #16202a;padding-top:5px}
+
+@media screen and (max-width:900px){
+  .sch thead{display:none}
+  .sch{display:block}
+  .sch tbody.pos{display:block;padding:14px 0;border-bottom:1.5px solid var(--rule)}
+  .sch tr.r1{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 10px;align-items:end}
+  .sch tr.r2{display:block;margin-top:10px}
+  .rt thead{display:none}
+  .rt tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:6px 8px;padding:10px 0;border-bottom:1px solid var(--rule)}
+  .rt td{display:block;border:0;padding:0}
+  .rt td:first-child{grid-column:1/-1}
+  .sch td{display:block;border:0;padding:0;width:auto;min-width:0}
+  .sch tr.r1 td::before{content:attr(data-l);display:block;font:600 10.5px ui-monospace,Menlo,monospace;color:var(--ink2);text-transform:uppercase;margin-bottom:2px}
+  .opt{gap:8px 14px}
+  .opt label{white-space:normal;max-width:100%}
+  .opt select{min-width:0;max-width:100%}
+  .sch td.w2{grid-column:span 2}.sch td.w3{grid-column:span 3}.sch td.w4{grid-column:span 4}
+  .sch td.num{text-align:left}
+  .sch td.c-del{align-self:end;text-align:right}
+  .sch td.c-del::before{content:none}
+  .paper{padding:22px 18px}
+  .paper .ph{flex-direction:column;gap:10px}.paper .pt{text-align:left}
+  .paper .two{grid-template-columns:1fr}
+  .paper .scope .c-sz,.paper .scope .c-gl{display:none}
+  .paper td .msz{display:block}
+}
+@media print{
+  @page{margin:14mm 14mm 16mm}
+  body{background:#fff;padding:0;font-size:12pt}
+  main{max-width:none}
+  .np,header,nav,section:not(#prop){display:none!important}
+  section#prop{border:0;margin:0;padding:0;background:#fff}
+  .paper{border:0;border-radius:0;max-width:none;margin:0;padding:0;font-size:10pt;line-height:1.42}
+  .paper td{font-size:10pt;padding:4px 6px}
+  .paper h3{margin-top:14px}
+  .paper tr,.paper li,.paper .sign,.paper .blk{break-inside:avoid}
+  .paper .draft{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="k">ELWIDO · просчёт заказа · пробный образец</div>
+  <h1>Просчёт <span>и предложение</span></h1>
+  <p>Вводишь ведомость окон, страница считает цену завода, пошлину, себестоимость на объекте и цену клиенту. Внизу собирается черновик предложения на английском, его можно напечатать. Всё введённое сохраняется в этом браузере.</p>
+</header>
+
+<nav aria-label="Разделы">
+  <a href="#job">Заказ</a><a href="#sch">Ведомость</a><a href="#rates">Ставки</a><a href="#landed">Пошлина</a><a href="#inst">Монтаж</a><a href="#price">Цена</a><a href="#prop">Предложение</a><a href="#need">От завода</a>
+</nav>
+
+<section class="goal" id="note">
+  <p id="note-txt"><b>Ставки завода здесь учебные.</b> Настоящего прайса пока нет, поэтому цифры показывают, как устроен расчёт, и клиенту их отправлять нельзя. Рабочие чертежи (<span class="en">shop drawings</span>) эта страница не делает, их готовит конструкторское бюро завода.</p>
+</section>
+
+<section id="job">
+  <h2>Заказ</h2>
+  <p class="sub">Эти поля попадают в предложение для клиента, поэтому заполняй их по-английски.</p>
+  <div class="grid">
+    <label>Проект<input type="text" data-b="p.name" placeholder="Park Slope Townhouse"></label>
+    <label>Адрес объекта<input type="text" data-b="p.addr" placeholder="Brooklyn, NY"></label>
+    <label>Клиент, компания<input type="text" data-b="p.client" placeholder="Prospect Builders"></label>
+    <label>Кому, имя<input type="text" data-b="p.attn"></label>
+    <label>Номер предложения<input type="text" data-b="p.no" placeholder="Q-2026-001"></label>
+    <label>Дата<input type="date" data-b="p.date"></label>
+    <label class="wide">Кто готовил: имя, телефон, почта<input type="text" data-b="p.by"></label>
+    <label class="wide">По каким листам и ревизиям считал (basis)<input type="text" data-b="p.basis" placeholder="DD set rev B, RFI #1"></label>
+    <label>Цвет и отделка<input type="text" data-b="p.finish" placeholder="Dark bronze"></label>
+    <label>Стекло, описание для клиента<input type="text" data-b="p.glazing" placeholder="Triple insulating glass"></label>
+  </div>
+  <div class="bar">
+    <button type="button" class="ghost" id="b-sample">Загрузить учебный заказ Park Slope</button>
+    <button type="button" class="ghost" id="b-f22">Загрузить заказ Villa F22</button>
+    <button type="button" class="ghost" id="b-new">Новый пустой заказ</button>
+  </div>
+  <p class="hint">Park Slope взят из главы 17 курса: 12 окон и дверь D01. На нём должно выйти $32 000 у завода, $80 335 затрат и $108 000 клиенту при марже 25,6%. Villa F22 это настоящий дом из пособия завода: 17 позиций с фасадами и большими раздвижными дверями, размеры и стёкла как их посчитал завод. Фасады в несколько ярусов и позиции из двух частей разбиты там на строки. Обе кнопки возвращают учебные ставки.</p>
+</section>
+
+<section id="sch">
+  <h2>Ведомость <small id="s-count">…</small></h2>
+  <p class="sub">Одна строка на марку или на группу одинаковых изделий. Размер бери по габариту изделия. Под строкой выбираешь стеклопакет, число шпросов и вписываешь настоящую цену завода, если она есть. Пока завод не назвал стекло, бери пакет со стёклами по 6 мм: в двух домах из пособий завод тоньше не ставил.</p>
+  <div class="seg" role="group" aria-label="Единицы размера">
+    <button type="button" data-u="mm" aria-pressed="false">мм</button><button type="button" data-u="in" aria-pressed="false">дюймы</button>
+  </div>
+  <div class="tw"><table class="sch" id="sch-t">
+    <thead><tr>
+      <th>Марка</th><th>Тип</th><th>Система</th><th id="h-w">Ширина</th><th id="h-h">Высота</th><th title="Створок, панелей или полей фасада по ширине">Ств.</th><th>Кол.</th>
+      <th class="num">Площадь, шт.</th><th class="num">Масса</th><th class="num">Цена, шт.</th><th class="num">Сумма</th><th></th>
+    </tr></thead>
+  </table></div>
+  <div class="bar"><button type="button" id="b-add">Добавить строку</button></div>
+  <div class="outs">
+    <div class="output out"><b id="s-units">…</b><span>изделий в заказе</span></div>
+    <div class="output out"><b id="s-area">…</b><span>площадь по габаритам</span></div>
+    <div class="output out key"><b id="s-fact">…</b><span>бюджетная цена завода</span></div>
+    <div class="output out" id="s-heavybox"><b id="s-heavy">…</b><span>самая тяжёлая деталь</span></div>
+    <div class="output out"><b id="s-kg">…</b><span>вес заказа без упаковки</span></div>
+  </div>
+  <p class="msg" id="s-msg"></p>
+  <p class="msg bad" id="s-warn"></p>
+  <ul class="notes" id="s-tips"></ul>
+  <p class="hint">Вес считается по заводским спецификациям из пособий Villa Optima и Villa F22. Стекло берётся по настоящему размеру стеклопакета, то есть габарит минус профиль, и весит 2,5 кг на м² на каждый мм толщины, как в «Базе», глава 03. К нему добавляется профиль по периметру. На окнах MasterLine 8 и раздвижных CP 155-LS расчёт расходится с заводом не больше чем на 5%, для других систем это оценка. У окон и дверей показан вес изделия целиком, у раздвижной двери вес одной панели, у фасада вес одного стеклопакета. В «Ств.» ставь число створок, панелей или полей фасада по ширине. Замечания под строками взяты из тех же пособий и каталога, перед ценой их проверяет завод.</p>
+</section>
+
+<section id="rates">
+  <h2>Ставки завода <small class="warn" id="r-tag">учебные</small></h2>
+  <p class="sub">Цена изделия равна ставке за м², умноженной на площадь по габариту, и округляется до целого. Все цифры ниже учебные, они подобраны под учебный заказ курса. Когда завод даст прайс, впиши его сюда: строки можно менять, добавлять и удалять.</p>
+  <div class="grid" style="max-width:520px">
+    <label>Валюта ставок<select data-b="cur"><option value="USD">USD, доллары</option><option value="EUR">EUR, евро</option></select></label>
+    <label id="fx-l">Курс: 1 EUR в долларах<input type="number" step="any" min="0" inputmode="decimal" data-b="fx" placeholder="впиши курс"></label>
+  </div>
+  <div class="tw" style="max-width:720px"><table class="rt">
+    <thead><tr><th>Система</th><th>Тип изделия</th><th class="num" id="h-rate">Ставка за м²</th><th></th></tr></thead>
+    <tbody id="ratesb"></tbody>
+  </table></div>
+  <div class="bar">
+    <button type="button" id="b-rate">Добавить ставку</button>
+    <button type="button" class="ghost" id="b-rdef">Вернуть учебные ставки</button>
+  </div>
+  <div class="grid" style="max-width:520px;margin-top:14px">
+    <label><span id="bar-l">Накладные шпросы, за метр</span><input type="number" step="any" min="0" inputmode="decimal" data-b="bar"></label>
+  </div>
+  <p class="hint">Доплата за шпросы тоже учебная. Из пособия завода известна одна её часть: герметизация в цеху стоит 2 евро за метр шва, это 8 евро на метр шпроса, потому что шпрос стоит снаружи и изнутри и у каждого два шва. Цену самого профиля и доплату за дуплексный стеклопакет должен дать завод.</p>
+  <label class="check"><input type="checkbox" data-b="confirmed"><span>Ставки подтверждены заводом. Убрать пометку «учебные» из предложения.</span></label>
+
+  <h3>Подгонка по просчётам завода</h3>
+  <div id="cal"></div>
+  <p class="hint">Schüco есть в списке, потому что завод на этой системе работает. В текст для клиента названия систем не попадают: их добавляют после писем системодателей.</p>
+</section>
+
+<section id="landed">
+  <h2>Доставка и пошлина</h2>
+  <p class="sub">Логика та же, что в «Базе», глава 08. Пошлина считается от цены завода: базовая 5,7% и Section 232 50% с полной стоимости, вместе 55,7%. Фрахт и страховка в базу пошлины не входят. Суммы перевозки поставь по котировкам под свой заказ.</p>
+  <div class="grid">
+    <label>Международный фрахт и страховка, $<input type="number" step="any" min="0" inputmode="decimal" data-b="c.frt"></label>
+    <label>Базовая пошлина MFN, %<input type="number" step="any" min="0" inputmode="decimal" data-b="c.mfn"></label>
+    <label>Section 232, %<input type="number" step="any" min="0" inputmode="decimal" data-b="c.s232"></label>
+    <label>MPF, %<input type="number" step="any" min="0" inputmode="decimal" data-b="c.mpf"></label>
+    <label>HMF, %<input type="number" step="any" min="0" inputmode="decimal" data-b="c.hmf"></label>
+    <label>Брокер, ISF, бонд, $<input type="number" step="any" min="0" inputmode="decimal" data-b="c.brk"></label>
+    <label>Вывоз из порта, склад, доставка, подъём, $<input type="number" step="any" min="0" inputmode="decimal" data-b="c.us"></label>
+    <label>Резерв на простой, досмотр, бой, %<input type="number" step="any" min="0" inputmode="decimal" data-b="c.cont"></label>
+    <label>Инженерия и чертежи, если их нет в цене завода, $<input type="number" step="any" min="0" inputmode="decimal" data-b="c.eng"></label>
+  </div>
+  <div class="outs">
+    <div class="output out"><b id="l-duty">…</b><span>пошлины MFN + 232</span></div>
+    <div class="output out"><b id="l-fees">…</b><span>MPF и HMF</span></div>
+    <div class="output out"><b id="l-log">…</b><span>перевозка, брокер, доставка</span></div>
+    <div class="output out"><b id="l-cont">…</b><span>резерв</span></div>
+    <div class="output out key"><b id="l-land">…</b><span>себестоимость изделий на объекте</span></div>
+    <div class="output out"><b id="l-mult">…</b><span>себестоимость на объекте / цена завода</span></div>
+  </div>
+  <p class="hint">MPF в расчёте ограничен пределами от $34,58 до $670,86 за ввоз. Резерв берётся от суммы товара, госплатежей и перевозки. Ставку пошлины на дату ввоза подтверждает брокер, эта модель его расчёт не заменяет.</p>
+</section>
+
+<section id="inst">
+  <h2>Монтаж <small>по желанию</small></h2>
+  <label class="check" style="margin-top:4px"><input type="checkbox" data-b="i.on"><span>Считать монтаж. В предложении тогда будет <span class="en">furnish and install</span>, без галочки <span class="en">supply only</span>.</span></label>
+  <div id="inst-f">
+    <div class="grid" style="margin-top:12px">
+      <label>Человек в бригаде<input type="number" step="any" min="0" inputmode="decimal" data-b="i.ppl"></label>
+      <label>Дней<input type="number" step="any" min="0" inputmode="decimal" data-b="i.days"></label>
+      <label>Часов в день<input type="number" step="any" min="0" inputmode="decimal" data-b="i.hrs"></label>
+      <label>Полная стоимость часа, $<input type="number" step="any" min="0" inputmode="decimal" data-b="i.rate"></label>
+      <label class="wide">Прочие затраты монтажа: доступ и переноска, демонтаж, расходники, водный тест, руководство, страховка, $<input type="number" step="any" min="0" inputmode="decimal" data-b="i.other"></label>
+    </div>
+    <div class="outs">
+      <div class="output out"><b id="i-crew">…</b><span>бригада</span></div>
+      <div class="output out key"><b id="i-tot">…</b><span>затраты на монтаж</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="price">
+  <h2>Цена клиенту</h2>
+  <p class="sub">Цель задаётся в марже, поэтому цена равна затратам, делённым на (1 − маржа). Наценка 30% даёт маржу только 23,1%. Если хочешь поставить в предложение круглую цифру, впиши её в поля справа, и страница покажет, какая маржа получилась.</p>
+  <div class="grid">
+    <label>Целевая маржа, %<input type="number" step="any" min="0" max="95" inputmode="decimal" data-b="m.target"></label>
+    <label>Цена поставки в предложение, $<input type="number" step="any" min="0" inputmode="decimal" data-b="m.ps" id="m-ps"></label>
+    <label id="m-pi-l">Цена монтажа в предложение, $<input type="number" step="any" min="0" inputmode="decimal" data-b="m.pi" id="m-pi"></label>
+  </div>
+  <div class="outs">
+    <div class="output out"><b id="p-cost">…</b><span>затраты всего</span></div>
+    <div class="output out"><b id="p-calc">…</b><span id="p-calc-l">расчётная цена при целевой марже</span></div>
+    <div class="output out key"><b id="p-price">…</b><span>цена клиенту</span></div>
+    <div class="output out" id="p-gmbox"><b id="p-gm">…</b><span>валовая маржа</span></div>
+    <div class="output out"><b id="p-gp">…</b><span>валовая прибыль</span></div>
+    <div class="output out"><b id="p-sf1">…</b><span>за sq ft, только поставка</span></div>
+    <div class="output out" id="p-sf2box"><b id="p-sf2">…</b><span>за sq ft, с монтажом</span></div>
+  </div>
+  <p class="msg" id="p-msg"></p>
+  <h3>Итог по заказу</h3>
+  <div class="tw" style="max-width:720px"><table class="sum"><tbody id="sumb"></tbody></table></div>
+  <p class="hint">В расчёт не входят sales и use tax, накладные расходы офиса и доля партнёров. Валовая прибыль считается до накладных и налогов, чистой прибылью она ещё не стала.</p>
+</section>
+
+<section id="prop">
+  <h2 class="np">Предложение <small>черновик на английском</small></h2>
+  <p class="sub np">Черновик собирается из ведомости и цен выше. Перед отправкой его читает человек: объём работ, исключения и условия оплаты у каждого заказа свои.</p>
+  <details class="np">
+    <summary>Править текст: что входит, что не входит, условия</summary>
+    <div class="grid">
+      <label>Срок поставки, от, недель<input type="number" step="1" min="0" inputmode="numeric" data-b="t.lt1"></label>
+      <label>Срок поставки, до, недель<input type="number" step="1" min="0" inputmode="numeric" data-b="t.lt2"></label>
+      <label>Предложение действует, дней<input type="number" step="1" min="1" inputmode="numeric" data-b="t.valid"></label>
+      <label class="wide">Inclusions, что входит. Один пункт на строку<textarea data-t="inc"></textarea></label>
+      <label class="wide">Exclusions, что не входит. Один пункт на строку<textarea data-t="exc"></textarea></label>
+      <label class="wide">Assumptions, условия цены. Один пункт на строку<textarea data-t="asm" style="min-height:90px"></textarea></label>
+      <label class="wide">Payment, платежи<textarea data-t="pay" style="min-height:64px"></textarea></label>
+    </div>
+    <div class="bar"><button type="button" class="ghost" id="b-tdef">Вернуть стандартный текст</button></div>
+    <p class="hint">Стандартный текст зависит от галочки «Считать монтаж». Срок от 14 до 20 недель взят из курса, сверь его с заводом.</p>
+  </details>
+  <div class="bar np">
+    <button type="button" id="b-print">Напечатать или сохранить в PDF</button>
+    <button type="button" class="ghost" id="b-copy">Скопировать текст</button>
+  </div>
+  <div id="status" class="np" role="status"></div>
+  <p class="msg bad np" id="x-warn"></p>
+  <div class="paper" id="paper"></div>
+  <textarea id="copybox" class="np" aria-label="Текст предложения" readonly></textarea>
+</section>
+
+<section id="need">
+  <h2>Что нужно от завода</h2>
+  <p class="sub">Пока этого нет, просчёт остаётся учебным.</p>
+  <ol class="need">
+    <li><b>Прайс за м²</b> по системам и типам изделий. Если прайса нет, подойдёт калькуляция с ценами по двум домам из пособий: Villa Optima (объект 091-30.11.2021) и Villa F22 (объект 242-25.08.2023). Спецификации по ним завод уже делал в программе ReynaPro, такие программы обычно печатают и цены. По ним подгоняются ставки на этой странице.</li>
+    <li><b>От чего цена растёт:</b> стекло (тройной пакет, закалка, ламинат), шпросы и дуплексный пакет, цвет и класс покрытия, фурнитура на тяжёлую панель, нестандартная форма. Есть ли минимальная цена за маленькое изделие.</li>
+    <li><b>Что входит в цену завода:</b> рабочие чертежи, упаковка для моря, монтажный комплект. В какой валюте счёт и как идут платежи.</li>
+    <li><b>Стекло и вес:</b> состав пакета по типам изделий, вес створки на наших размерах, предельные размеры и веса по системам.</li>
+    <li><b>Упаковка и отгрузка:</b> размеры и вес ящиков, сколько входит в контейнер, что едет со стеклом, цена вывоза с завода до порта.</li>
+    <li><b>Сроки:</b> недели от утверждённых чертежей до готовности к отгрузке и за сколько дней завод даёт сам просчёт.</li>
+  </ol>
+  <p class="hint">Фрахт, брокера и доставку по Нью-Йорку завод не назовёт. Эти цифры дают перевозчик и таможенный брокер, ставку пошлины тоже подтверждает брокер.</p>
+</section>
+</main>
+
+<script>
+(function(){
+"use strict";
+var KEY="elwido-quote-v1",IN=25.4,SQFT=10.7639104,LB=2.20462;
+/* Glass weight (2.5 kg per m2 per mm) and the 100 / 200 kg flags follow k03-w in pocket/03-glass.html; the frame share is
+   taken from factory specs instead of the flat +12%, see WM below. Landed cost model is k08-landed from pocket/08-money.html,
+   MPF clamp included. */
+var MPF_MIN=34.58,MPF_MAX=670.86;
+var TYPES={fx:["Глухое","Fixed window","lites"],tt:["Tilt-turn","Tilt-turn window","sashes"],dr:["Дверь","Hinged door","leaves"],
+           ls:["Lift-and-slide","Lift-and-slide door","panels"],fc:["Фасад","Curtain wall, stick system","lites"]};
+var TORDER=["fx","tt","dr","ls","fc"];
+/* Weight model fitted on the factory's own ReynaPro specs (training files Villa Optima and Villa F22 in the project root).
+   Glass pane = unit size minus profile (dw, dh per sash); glass is 2.5 kg per m2 per mm (the specs give 45.0 kg/m2 at 18 mm).
+   Profile = fr kg per metre of frame + sa kg per metre of sash. Checked against the specs: MasterLine 8 windows and CP 155-LS
+   within 5%, MasterPatio panels fall in the same 250 / 400 kg hardware class the factory picked on all five F22 doors.
+   Door glass deductions come from the one MasterLine 8 door in F22 (970 x 2875 unit, 702 x 2646 glass), door profile weight is an estimate.
+   Curtain wall: pane from a 50 mm grid, profile about 22% of glass weight. piece = what gets lifted in one go:
+   u whole unit, p one sliding panel, g one glass pane. */
+var WM={fx:{dw:82,dh:82,fr:1.8,sa:0,piece:"u"},tt:{dw:200,dh:200,fr:1.8,sa:2.2,piece:"u"},dr:{dw:268,dh:229,fr:2.0,sa:3.4,piece:"u"},
+        ls:{dw:132,dh:242,fr:3.5,sa:2.6,piece:"p"},fc:{dw:0,dh:74,fr:0,sa:0,piece:"g"}};
+var PIECE={u:"изделие",p:"панель",g:"стеклопакет"};
+/* Glass make-ups. t48 to t66 are the ones the factory used in the two training houses, t40 is the course budget glass.
+   mm = glass only, min = thinnest pane. */
+var GLASS=[
+  {id:"t40",f:"4-16-4-16-4",mm:12,min:4,k:"Triple"},
+  {id:"t48",f:"6-15-6-15-6",mm:18,min:6,k:"Triple"},
+  {id:"t52",f:"6-18-6-16-6",mm:18,min:6,k:"Triple"},
+  {id:"t52b",f:"8-16-6-16-6",mm:20,min:6,k:"Triple"},
+  {id:"t58",f:"8-18-8-16-8",mm:24,min:8,k:"Triple"},
+  {id:"t66",f:"10-18-10-18-10",mm:30,min:10,k:"Triple"},
+  {id:"l54",f:"44.2-16-6-16-6",mm:20,min:6,k:"Triple, laminated outer pane,"},
+  {id:"d28",f:"6-16-6",mm:12,min:6,k:"Double"}
+];
+function glassBy(id){for(var i=0;i<GLASS.length;i++)if(GLASS[i].id===id)return GLASS[i];return null;}
+/* Largest sash or panel per system, W x H in mm, from the ELWIDO catalogue table in pocket/04-systems.html.
+   w = window or door sash, s = sliding panel. Matched by a piece of the system name. */
+var LIMITS=[["mb-79n","w",1350,2700],["mb-86","w",1700,2800],["mb-104","w",1700,2900],["aws 75","w",1700,2500],["aws 90","w",1700,2500],
+            ["masterline 10","w",1700,2800],["masterpatio","s",3000,3600],["mb-77 hs","s",3300,3200],["hi-finity","s",3500,4000]];
+
+/* Training rates, USD per m2. MB-86 and MB-77 HS are tuned so that the course order (ch. 17, Park Slope)
+   prices at exactly $32,000 with unit prices rounded to whole dollars. Everything else is a placeholder. */
+function defRates(){return [
+  {id:"a86f",sys:"Aluprof MB-86",type:"fx",rate:610},
+  {id:"a86t",sys:"Aluprof MB-86",type:"tt",rate:1000},
+  {id:"a86d",sys:"Aluprof MB-86",type:"dr",rate:1450},
+  {id:"a77h",sys:"Aluprof MB-77 HS",type:"ls",rate:1320},
+  {id:"asrf",sys:"Aluprof MB-SR50N HI+",type:"fc",rate:700},
+  {id:"a79f",sys:"Aluprof MB-79N",type:"fx",rate:560},
+  {id:"a79t",sys:"Aluprof MB-79N",type:"tt",rate:920},
+  {id:"a104f",sys:"Aluprof MB-104",type:"fx",rate:720},
+  {id:"a104t",sys:"Aluprof MB-104",type:"tt",rate:1180},
+  {id:"r8f",sys:"Reynaers MasterLine 8",type:"fx",rate:650},
+  {id:"r8t",sys:"Reynaers MasterLine 8",type:"tt",rate:1060},
+  {id:"r8d",sys:"Reynaers MasterLine 8",type:"dr",rate:1500},
+  {id:"rm10f",sys:"Reynaers MasterLine 10",type:"fx",rate:700},
+  {id:"rm10t",sys:"Reynaers MasterLine 10",type:"tt",rate:1150},
+  {id:"rmph",sys:"Reynaers MasterPatio",type:"ls",rate:1480},
+  {id:"rcpl",sys:"Reynaers CP 155-LS",type:"ls",rate:1380},
+  {id:"rcwf",sys:"Reynaers CW 50-HI",type:"fc",rate:780},
+  {id:"m77f",sys:"Alumil S77",type:"fx",rate:540},
+  {id:"m77t",sys:"Alumil S77",type:"tt",rate:880},
+  {id:"m77d",sys:"Alumil S77",type:"dr",rate:1300},
+  {id:"m700",sys:"Alumil S700",type:"ls",rate:1200},
+  {id:"m7f",sys:"Alumil Smartia M7",type:"fc",rate:640},
+  {id:"s75f",sys:"Schüco AWS 75.SI+",type:"fx",rate:680},
+  {id:"s75t",sys:"Schüco AWS 75.SI+",type:"tt",rate:1120}
+];}
+
+var DEF={
+  inc:{fi:["Shop drawings for your approval","Field measure of every opening before release to production","Windows and doors per the schedule above, with glass and hardware","Delivery to your site, duty paid","Installation, including shims, anchors and sill pans","Perimeter sealing","Removal and disposal of existing windows","Field water test (AAMA 502) at two openings"],
+       so:["Shop drawings for your approval","Windows and doors per the schedule above, with glass and hardware","Export packing","One delivery to your site, curbside, duty paid"]},
+  exc:{fi:["Masonry and stone repair","Lintels, structural work and preparation of openings","Interior trim and finish at jambs","Electrical work","DOB and LPC permits and filings","Scaffolding and sidewalk shed","Sales tax. Price assumes a signed Form ST-124."],
+       so:["Installation, field measure and perimeter sealing","Preparation of openings, masonry, trim and electrical work","DOB and LPC permits and filings","Unloading, hoisting, storage, redelivery and sales tax are excluded unless listed above."]},
+  asm:{fi:["Openings are ready, dry and within tolerance when we start.","Curbside unloading space is provided by the GC.","Sizes are taken from the drawings listed above. Final sizes follow our field measure."],
+       so:["Curbside unloading space and labor to unload are provided by the buyer.","Sizes are taken from the drawings listed above. Final sizes are confirmed on the approved shop drawings."]},
+  pay:{fi:["30% at release to production, 40% before shipment from the factory, 25% after installation, 5% retainage after punch list and closeout."],
+       so:["50% at release to production, 50% before shipment from the factory."]}
+};
+
+var uidN=0;
+function uid(){uidN++;return "x"+Date.now().toString(36)+uidN;}
+function today(){var d=new Date();function z(x){return (x<10?"0":"")+x;}return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate());}
+function n(x){x=parseFloat(x);return isFinite(x)?x:0;}
+function blank(){return {v:1,rv:2,
+  p:{name:"",addr:"",client:"",attn:"",no:"",date:today(),by:"",basis:"",finish:"",glazing:""},
+  unit:"mm",rows:[],rates:defRates(),cur:"USD",fx:"",bar:40,confirmed:false,
+  c:{frt:6350,mfn:5.7,s232:50,mpf:0.3464,hmf:0.125,brk:600,us:4500,cont:3,eng:0},
+  i:{on:false,ppl:3,days:6,hrs:8,rate:65,other:0},
+  m:{target:30,ps:"",pi:""},
+  t:{inc:null,exc:null,asm:null,pay:null,lt1:14,lt2:20,valid:30}};}
+/* glass: a GLASS id, or a number of mm for a make-up that is not in the list */
+function mkRow(mark,type,rid,w,h,glass,pan,qty){var g=typeof glass==="string"?glassBy(glass):null;
+  return {id:uid(),mark:mark,type:type,rid:rid,w:w,h:h,gf:g?g.id:"",gl:g?g.mm:glass,pan:pan,qty:qty,bv:0,bh:0,act:""};}
+/* Course order, ch. 17: 12 windows + D01, 341 sq ft. Costs are the "plan" column of c17-budget:
+   freight 5,500 + insurance 200, broker 900, drayage 1,800, engineering 2,500, install 9,360 + 10,100, price 78,000 + 30,000. */
+function sample(){var s=blank(),I=function(x){return x*IN;};
+  s.p={name:"Park Slope Townhouse",addr:"Park Slope, Brooklyn, NY",client:"Prospect Builders",attn:"",no:"Q-2026-001",date:today(),by:"",basis:"DD set rev B, RFI #1, sketch SK-01",finish:"Dark bronze, to match the approved sample",glazing:"Triple insulating glass, safety glass where required"};
+  s.unit="in";
+  s.rows=[mkRow("W01-W04","tt","a86t",I(36),I(60),"t40",1,4),mkRow("W05-W06","tt","a86t",I(42),I(84),"t40",1,2),mkRow("W07","tt","a86t",I(48),I(72),"t40",1,1),
+          mkRow("W08","fx","a86f",I(48),I(84),"t40",1,1),mkRow("W09-W10","fx","a86f",I(36),I(84),"t40",1,2),mkRow("W11-W12","tt","a86t",I(36),I(84),"t40",1,2),
+          mkRow("D01","ls","a77h",I(144),I(96),"t52",2,1)];
+  s.c={frt:5700,mfn:5.7,s232:50,mpf:0.3464,hmf:0.125,brk:900,us:1800,cont:0,eng:2500};
+  s.i={on:true,ppl:3,days:6,hrs:8,rate:65,other:10100};
+  s.m={target:30,ps:78000,pi:30000};
+  return s;}
+/* Real house from the factory training file "Обучение Villa F22.pdf", object 242-25.08.2023: final positions as the factory
+   drew them (sizes, systems, glass). Multi-tier curtain walls and two-part positions are split into lines (а, б, в). */
+function sampleF22(){var s=blank();
+  s.p={name:"Villa F22",addr:"",client:"",attn:"",no:"Q-2026-002",date:today(),by:"",basis:"Factory training case, object 242-25.08.2023, final positions",finish:"",glazing:"Triple insulating glass, make-up per the schedule"};
+  s.rows=[mkRow("В-1","fx","r8f",500,3085,"t52",1,2),
+          mkRow("В-2а","fc","rcwf",3705,3075,"t52",2,1),mkRow("В-2б","fc","rcwf",850,3075,"t52",2,1),mkRow("ДЗ-1","dr","r8d",985,3005,"t52",1,1),
+          mkRow("В-3","ls","rmph",2370,3140,"t52",2,1),mkRow("В-4","fc","rcwf",2320,2875,"t58",1,1),mkRow("В-5","fc","rcwf",5170,2875,"t58",2,1),
+          mkRow("В-6","ls","rmph",4390,2940,"t52b",2,1),mkRow("В-7","ls","rmph",4220,2940,"t52b",2,1),mkRow("В-8","fx","r8f",3630,725,"t58",1,1),
+          mkRow("В-9а","fx","r8f",1380,2300,"t52",1,1),mkRow("В-9б","tt","r8t",1070,2300,"t52",1,1),
+          mkRow("В-10а","fx","r8f",400,2300,"t52",1,1),mkRow("В-10б","tt","r8t",1070,2300,"t52",1,1),
+          mkRow("В-11","ls","rmph",2370,3090,"t52",2,1),mkRow("В-12","fx","r8f",2525,3090,"t58",1,1),mkRow("В-13","ls","rmph",2600,3090,"t58",2,1),
+          mkRow("В-14","ls","rmph",4390,3090,"t52b",2,1),
+          mkRow("В-15а","fc","rcwf",2570,3065,"t58",1,1),mkRow("В-15б","fc","rcwf",2570,575,"t58",1,1),mkRow("В-15в","fc","rcwf",2570,3135,"t58",1,1),
+          mkRow("Дз-2","dr","r8d",970,2875,"t52",1,1)];
+  return s;}
+function merge(base,saved){var out={};Object.keys(base).forEach(function(k){
+    var b=base[k],s=saved[k];
+    if(Array.isArray(b))out[k]=Array.isArray(s)?s:b;
+    else if(b&&typeof b==="object")out[k]=Object.assign({},b,(s&&typeof s==="object")?s:{});
+    else out[k]=(s===undefined?b:s);
+  });return out;}
+
+var st=null;
+try{var raw=localStorage.getItem(KEY);if(raw){var pr=JSON.parse(raw);if(pr&&pr.v===1){
+  var oldRates=!(pr.rv>=2);st=merge(blank(),pr);
+  /* states saved before the curtain wall type existed: add the default rates they do not have yet, once */
+  if(oldRates){var have={};st.rates.forEach(function(x){have[x.id]=1;});defRates().forEach(function(x){if(!have[x.id])st.rates.push(x);});}
+  st.rv=2;}}}catch(e){st=null;}
+if(!st)st=sample();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
+
+function $(id){return document.getElementById(id);}
+function setT(id,t){var e=$(id);if(e)e.textContent=t;}
+var nf0=new Intl.NumberFormat("ru-RU",{maximumFractionDigits:0});
+function money(x){if(!isFinite(x))return "…";return (x<0?"−$":"$")+nf0.format(Math.abs(Math.round(x)));}
+function num(x,d){if(!isFinite(x))return "…";return new Intl.NumberFormat("ru-RU",{maximumFractionDigits:d==null?1:d,minimumFractionDigits:0}).format(x);}
+function pct(x,d){if(!isFinite(x))return "…";return num(x,d==null?1:d)+"%";}
+function usd(x){return (x<0?"-$":"$")+new Intl.NumberFormat("en-US",{maximumFractionDigits:0}).format(Math.abs(Math.round(x)));}
+function enNum(x,d){return new Intl.NumberFormat("en-US",{maximumFractionDigits:d==null?0:d}).format(x);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function get(path){return path.split(".").reduce(function(o,k){return o==null?o:o[k];},st);}
+function set(path,v){var a=path.split("."),o=st;for(var i=0;i<a.length-1;i++)o=o[a[i]];o[a[a.length-1]]=v;}
+function curK(){return st.cur==="EUR"?(n(st.fx)>0?n(st.fx):NaN):1;}
+function curS(){return st.cur==="EUR"?"€":"$";}
+function rateBy(id){for(var i=0;i<st.rates.length;i++)if(st.rates[i].id===id)return st.rates[i];return null;}
+function ratesOf(type){return st.rates.filter(function(x){return x.type===type;});}
+function mode(){return st.i.on?"fi":"so";}
+
+/* ---------- one schedule line ---------- */
+function calcRow(r,k){
+  var W=n(r.w),H=n(r.h),a=W*H/1e6,q=Math.max(0,Math.round(n(r.qty))),np=Math.max(1,Math.round(n(r.pan))||1);
+  var g=r.gf?glassBy(r.gf):null,gl=g?g.mm:n(r.gl),m=WM[r.type]||WM.fx,fc=r.type==="fc";
+  var pw=Math.max(0,fc?(W-50)/np-24:W/np-m.dw),ph=Math.max(0,H-m.dh),pa=pw*ph/1e6,pane=pa*gl*2.5;
+  var sash=m.sa*2*(W/np+H)/1000,frame=m.fr*(2*(W+H)+(r.type==="ls"?0:(np-1)*H))/1000;
+  var unitKg=fc?np*pane*1.22:np*(pane+sash)+frame;
+  var piece=m.piece==="p"?pane+sash:m.piece==="g"?pane:unitKg;
+  var sw=m.piece==="u"?W:(fc?pw:W/np),sh=fc?ph:H;
+  var bars=np*(Math.max(0,Math.round(n(r.bv)))*ph+Math.max(0,Math.round(n(r.bh)))*pw)/1000;
+  var rt=rateBy(r.rid),act=n(r.act),uc=NaN,src="";
+  if(rt&&rt.type!==r.type)rt=null;
+  if(act>0){uc=act;src="act";}
+  else if(rt&&a>0&&n(rt.rate)>0){uc=Math.round(n(rt.rate)*a)+Math.round(bars*n(st.bar));src="rate";}
+  return {a:a,q:q,pan:np,gl:gl,g:g,pw:pw,ph:ph,pa:pa,glass:pane,tot:piece,unitKg:unitKg,sw:sw,sh:sh,bars:bars,unit:uc*k,line:uc*k*q,src:src,rt:rt,act:act};
+}
+function wClass(t){return t>200?"r":t>100?"a":"";}
+function wText(t){
+  if(t>200)return "Больше 200 кг: вручную не ставят. Нужны механизация, маршрут подъёма и проверка фурнитуры по весу створки.";
+  if(t>100)return "Больше 100 кг: вакуумные присоски и три-четыре человека. Проверь допуск фурнитуры по весу створки.";
+  return "До 100 кг: обычный монтаж бригадой. Вес створки всё равно сверяй с допуском фурнитуры.";
+}
+/* Row checks. Sources: the factory training files (wide sash, narrow glass, 250 and 400 kg sliding hardware, flat bars on
+   sliding doors), the catalogue sash limits, the container door size from the factory cheat sheet. w = check with the factory, b = will not work as drawn. */
+function mm0(x){return num(Math.round(x),0);}
+function rowNotes(r,c){
+  var o=[],t=r.type,name=c.rt?String(c.rt.sys||"").toLowerCase():"";
+  if(!(c.a>0))return o;
+  var sashW=n(r.w)/c.pan,H=n(r.h);
+  if(t==="tt"||t==="dr"||t==="ls"){
+    var lim=null;LIMITS.forEach(function(L){if(!lim&&name.indexOf(L[0])>=0&&(L[1]==="s")===(t==="ls"))lim=L;});
+    if(lim&&(sashW>lim[2]||H>lim[3]))o.push(["w",(t==="ls"?"Панель ":"Створка ")+mm0(sashW)+" × "+mm0(H)+" мм больше предела этой системы по каталогу, там "+mm0(lim[2])+" × "+mm0(lim[3])+" мм. Нужна другая система, деление на части или глухое остекление."]);
+  }
+  if((t==="tt"||t==="dr")&&sashW>1400)o.push(["w","Створка шириной "+mm0(sashW)+" мм. Такую тяжело открывать, фурнитура работает на пределе. Предложи две створки или глухую часть."]);
+  if(c.pw>0&&c.ph>0){
+    var lo=Math.min(c.pw,c.ph),hi=Math.max(c.pw,c.ph);
+    if(hi>6000||lo>3210)o.push(["b","Стекло около "+mm0(c.pw)+" × "+mm0(c.ph)+" мм больше стандартного листа 3210 × 6000 мм. Одним куском его не сделать, дели на части."]);
+    else if(hi/lo>5)o.push(["w","Стекло около "+mm0(c.pw)+" × "+mm0(c.ph)+" мм, стороны относятся как 1 к "+num(hi/lo,1)+". Пакет с соотношением больше 1 к 5 стекольный завод может оставить без гарантии, уточни до цены."]);
+    if(c.g&&c.g.min<=4&&c.pa>3)o.push(["w","Стекло "+num(c.pa,1)+" м² при листе 4 мм. На таком размере завод, скорее всего, поставит 6 мм и толще: вес и цена вырастут."]);
+  }
+  if(Math.min(c.sw,c.sh)>2580)o.push(["w",(t==="ls"?"Панель ":t==="fc"?"Стекло ":"Изделие ")+mm0(c.sw)+" × "+mm0(c.sh)+" мм не проходит в дверь обычного контейнера, проём там около 2,34 × 2,58 м. Поедет под наклоном или в открытом контейнере, это дороже."]);
+  if(t==="ls"&&c.gl>0){
+    if(c.tot>400)o.push(["b","Панель около "+num(c.tot,0)+" кг. В пособиях завода самый тяжёлый комплект фурнитуры рассчитан на 400 кг. Дели дверь на большее число панелей или спрашивай завод."]);
+    else if(c.tot>250)o.push(["w","Панель около "+num(c.tot,0)+" кг. Обычный комплект фурнитуры держит до 250 кг, здесь нужен усиленный на 400 кг. Он дороже, заложи это в цену."]);
+  }
+  if(c.bars>0){
+    if(name.indexOf("hi-finity")>=0)o.push(["b","На Hi-Finity и похожие системы с тонким профилем шпросы не ставят."]);
+    else if(t==="ls")o.push(["w","На раздвижную дверь идут только плоские шпросы: фигурный выступает за раму и при открывании отлетит. Тогда и на остальных окнах заказа ставят плоские."]);
+  }
+  return o;
+}
+
+/* ---------- schedule table: one tbody per position, inputs on the first line, glass, bars, factory quote and checks on the second ---------- */
+var outs={};
+function dimOut(mm){if(mm===""||mm==null||!isFinite(mm))return "";return String(st.unit==="in"?Math.round(mm/IN*1000)/1000:Math.round(mm*10)/10);}
+function rowEl(r){
+  var tb=document.createElement("tbody"),tr=document.createElement("tr"),o={};
+  tb.className="pos";tr.className="r1";tb.appendChild(tr);
+  function td(l,cls){var c=document.createElement("td");c.setAttribute("data-l",l);if(cls)c.className=cls;tr.appendChild(c);return c;}
+  function inp(c,type,val,aria,fn,ph){
+    var i=document.createElement("input");i.type=type;i.value=(val==null?"":val);i.setAttribute("aria-label",aria);
+    if(type==="number"){i.step="any";i.min="0";i.inputMode="decimal";}
+    if(ph)i.placeholder=ph;
+    i.addEventListener("input",function(){fn(i.value);recalc();});
+    c.appendChild(i);return i;
+  }
+  function numv(v){if(v==="")return "";v=parseFloat(String(v).replace(",","."));return isFinite(v)?v:"";}
+  var U=st.unit==="in"?"in":"мм";
+  inp(td("Марка","c-mark w2"),"text",r.mark,"Марка",function(v){r.mark=v;},"W01");
+
+  var sel=document.createElement("select");sel.setAttribute("aria-label","Тип изделия");
+  TORDER.forEach(function(t){var op=document.createElement("option");op.value=t;op.textContent=TYPES[t][0];sel.appendChild(op);});
+  sel.value=r.type;td("Тип","c-type w2").appendChild(sel);
+
+  var ss=document.createElement("select");ss.setAttribute("aria-label","Система");td("Система","c-sys w4").appendChild(ss);
+  function fillSys(){
+    ss.textContent="";var list=ratesOf(r.type),has=list.some(function(x){return x.id===r.rid;});
+    if(!has){r.rid="";var o0=document.createElement("option");o0.value="";o0.textContent=list.length?"выбери систему":"нет ставки";ss.appendChild(o0);}
+    list.forEach(function(x){var op=document.createElement("option");op.value=x.id;op.textContent=x.sys||"без названия";ss.appendChild(op);});
+    ss.value=r.rid;
+  }
+  fillSys();
+
+  inp(td("Ширина, "+U,"c-dim"),"number",dimOut(r.w),"Ширина, "+U,function(v){v=numv(v);r.w=v===""?"":v*(st.unit==="in"?IN:1);});
+  inp(td("Высота, "+U,"c-dim"),"number",dimOut(r.h),"Высота, "+U,function(v){v=numv(v);r.h=v===""?"":v*(st.unit==="in"?IN:1);});
+  var ip=inp(td("Створок","c-s"),"number",r.pan,"Створок, панелей или полей фасада",function(v){r.pan=numv(v);});
+  inp(td("Кол.","c-s"),"number",r.qty,"Количество",function(v){r.qty=numv(v);});
+  o.area=td("Площадь, шт.","num w2");o.wt=td("Масса","num w2 c-wt");o.unit=td("Цена, шт.","num w2");o.tot=td("Сумма","num");
+  var del=document.createElement("button");del.type="button";del.className="x";del.textContent="×";del.setAttribute("aria-label","Удалить строку "+(r.mark||""));
+  del.addEventListener("click",function(){st.rows=st.rows.filter(function(x){return x!==r;});renderRows();recalc();});
+  td("","c-del").appendChild(del);
+
+  var tr2=document.createElement("tr"),c2=document.createElement("td"),box=document.createElement("div");
+  tr2.className="r2";c2.colSpan=12;box.className="opt";tr2.appendChild(c2);c2.appendChild(box);tb.appendChild(tr2);
+  function lab(text){var l=document.createElement("label");l.appendChild(document.createTextNode(text));box.appendChild(l);return l;}
+  var lg=lab("Стеклопакет"),gs=document.createElement("select");gs.setAttribute("aria-label","Стеклопакет");
+  GLASS.forEach(function(x){var op=document.createElement("option");op.value=x.id;op.textContent=x.f+" · "+x.mm+" мм стекла";gs.appendChild(op);});
+  var oc=document.createElement("option");oc.value="";oc.textContent="своя толщина";gs.appendChild(oc);
+  if(!glassBy(r.gf))r.gf="";
+  gs.value=r.gf;lg.appendChild(gs);
+  var gi=inp(lg,"number",r.gl,"Стекло всего, мм",function(v){r.gl=numv(v);},"мм");gi.className="n3";gi.title="Сумма толщин стёкол без камер, мм";
+  function syncG(){gi.style.display=r.gf?"none":"";}
+  gs.addEventListener("change",function(){r.gf=gs.value;var x=glassBy(r.gf);if(x){r.gl=x.mm;gi.value=x.mm;}syncG();recalc();});
+  syncG();
+  inp(lab("Шпросы на одно стекло: верт."),"number",n(r.bv)||"","Шпросов вертикальных на одно стекло",function(v){r.bv=numv(v);},"0").className="n2";
+  inp(lab("гор."),"number",n(r.bh)||"","Шпросов горизонтальных на одно стекло",function(v){r.bh=numv(v);},"0").className="n2";
+  inp(lab("Просчёт завода, "+curS()+"/шт."),"number",r.act,"Просчёт завода за штуку",function(v){r.act=numv(v);},"нет").className="n4";
+  o.notes=document.createElement("ul");o.notes.className="notes";c2.appendChild(o.notes);
+
+  sel.addEventListener("change",function(){
+    var old=r.type;r.type=sel.value;var f=ratesOf(r.type)[0];r.rid=f?f.id:"";
+    if(r.type==="ls"&&n(r.pan)<=1){r.pan=2;ip.value=2;}
+    else if(old==="ls"&&r.type!=="ls"&&n(r.pan)===2){r.pan=1;ip.value=1;}
+    fillSys();recalc();
+  });
+  ss.addEventListener("change",function(){r.rid=ss.value;recalc();});
+  outs[r.id]=o;return tb;
+}
+function renderRows(){
+  var t=$("sch-t");[].slice.call(t.querySelectorAll("tbody.pos")).forEach(function(b){t.removeChild(b);});outs={};
+  st.rows.forEach(function(r){t.appendChild(rowEl(r));});
+  var U=st.unit==="in"?"in":"мм";
+  setT("h-w","Ширина, "+U);setT("h-h","Высота, "+U);
+  [].forEach.call(document.querySelectorAll(".seg button"),function(b){b.setAttribute("aria-pressed",b.getAttribute("data-u")===st.unit?"true":"false");});
+}
+
+/* ---------- rates table ---------- */
+function renderRates(){
+  var tb=$("ratesb");tb.textContent="";
+  st.rates.forEach(function(x){
+    var tr=document.createElement("tr");
+    function td(cls){var c=document.createElement("td");if(cls)c.className=cls;tr.appendChild(c);return c;}
+    var a=document.createElement("input");a.type="text";a.value=x.sys;a.setAttribute("aria-label","Система");
+    a.addEventListener("input",function(){x.sys=a.value;renderRows();recalc();});td().appendChild(a);
+    var s=document.createElement("select");s.setAttribute("aria-label","Тип изделия");
+    TORDER.forEach(function(t){var op=document.createElement("option");op.value=t;op.textContent=TYPES[t][0];s.appendChild(op);});
+    s.value=x.type;s.addEventListener("change",function(){x.type=s.value;renderRows();recalc();});td().appendChild(s);
+    var v=document.createElement("input");v.type="number";v.step="any";v.min="0";v.inputMode="decimal";v.value=x.rate;v.className="num";v.setAttribute("aria-label","Ставка за квадратный метр");
+    v.addEventListener("input",function(){x.rate=v.value===""?"":n(v.value);recalc();});td().appendChild(v);
+    var d=document.createElement("button");d.type="button";d.className="x";d.textContent="×";d.setAttribute("aria-label","Удалить ставку "+x.sys);
+    d.addEventListener("click",function(){st.rates=st.rates.filter(function(y){return y!==x;});renderRates();renderRows();recalc();});td().appendChild(d);
+    tb.appendChild(tr);
+  });
+  setT("h-rate","Ставка, "+curS()+" за м²");setT("bar-l","Накладные шпросы, "+curS()+" за погонный метр");
+  $("fx-l").style.display=st.cur==="EUR"?"":"none";
+}
+
+/* ---------- calibration against real factory quotes ---------- */
+function renderCal(rowsC){
+  var box=$("cal"),by={};
+  st.rows.forEach(function(r,i){var c=rowsC[i];if(!(c.act>0&&c.a>0&&c.q>0&&c.rt))return;
+    var g=by[c.rt.id]||(by[c.rt.id]={rt:c.rt,sum:0,area:0,lines:0});g.sum+=c.act*c.q;g.area+=c.a*c.q;g.lines++;});
+  var ids=Object.keys(by);box.textContent="";
+  if(!ids.length){var p=document.createElement("p");p.className="hint";p.style.marginTop="0";
+    p.textContent="Когда завод пришлёт настоящие цены по маркам, впиши их в ведомости в колонку «Просчёт завода». Здесь появится сравнение со ставками и кнопка, которая подгонит ставку под цены завода.";
+    box.appendChild(p);return;}
+  var t=document.createElement("table"),h=document.createElement("thead");
+  h.innerHTML='<tr><th>Система и тип</th><th class="num">Ставка сейчас</th><th class="num">По просчётам завода</th><th class="num">Разница</th><th></th></tr>';
+  t.appendChild(h);var b=document.createElement("tbody");t.appendChild(b);
+  ids.forEach(function(id){var g=by[id],imp=Math.round(g.sum/g.area),cur=n(g.rt.rate),tr=document.createElement("tr");
+    function td(txt,cls){var c=document.createElement("td");c.textContent=txt;if(cls)c.className=cls;tr.appendChild(c);return c;}
+    td((g.rt.sys||"без названия")+", "+TYPES[g.rt.type][0].toLowerCase()+" · строк: "+g.lines+" · "+num(g.area,1)+" м²");
+    td(curS()+num(cur,0),"num");td(curS()+num(imp,0),"num");td(!(cur>0)?"…":imp===cur?"0%":(imp>cur?"+":"−")+pct(Math.abs(imp/cur-1)*100,1),"num");
+    var bt=document.createElement("button");bt.type="button";bt.className="ghost";bt.textContent=imp===cur?"Совпадает":"Записать в ставку";bt.disabled=imp===cur;
+    bt.addEventListener("click",function(){g.rt.rate=imp;renderRates();recalc();});
+    var c=document.createElement("td");c.className="num";c.appendChild(bt);tr.appendChild(c);b.appendChild(tr);});
+  var w=document.createElement("div");w.className="tw";w.appendChild(t);box.appendChild(w);
+}
+
+/* ---------- totals ---------- */
+function recalc(){
+  var k=curK(),V=0,A=0,U=0,KG=0,heavy=null,noPrice=0,nNotes=0,has={},rowsC=[];
+  st.rows.forEach(function(r){
+    var c=calcRow(r,k),o=outs[r.id],w=c.a>0&&c.gl>0,pk=(WM[r.type]||WM.fx).piece;rowsC.push(c);
+    if(c.a>0){A+=c.a*c.q;U+=c.q;KG+=c.unitKg*c.q;has[r.type]=1;if(c.bars>0)has.bars=1;}
+    if(isFinite(c.line)&&c.a>0)V+=c.line;else if(c.a>0&&c.q>0)noPrice++;
+    if(w&&(!heavy||c.tot>heavy.tot))heavy={tot:c.tot,mark:r.mark,piece:pk};
+    var notes=rowNotes(r,c);nNotes+=notes.length;
+    if(!o)return;
+    o.area.innerHTML=c.a>0?esc(num(c.a,2))+" м²<small>"+esc(num(c.a*SQFT,1))+" sq ft</small>":"…";
+    var what=PIECE[pk];
+    if(r.type==="ls"&&w)what+=c.tot>400?", тяжелее 400 кг":c.tot>250?", фурнитура на 400 кг":", фурнитура до 250 кг";
+    o.wt.innerHTML=w?'<span class="pill '+wClass(c.tot)+'">'+esc(num(c.tot,0))+" кг</span><small>"+esc(num(c.tot*LB,0))+" lb · "+esc(what)+"</small>":"…";
+    o.wt.title=w?"Стеклопакет "+mm0(c.pw)+" × "+mm0(c.ph)+" мм, "+num(c.glass,0)+" кг. Изделие целиком около "+num(c.unitKg,0)+" кг.":"";
+    o.unit.innerHTML=isFinite(c.unit)?esc(money(c.unit))+(c.src==="act"?'<small class="tagf">по просчёту</small>':c.bars>0?"<small>шпросы "+esc(num(c.bars,1))+" м</small>":""):"…";
+    o.tot.textContent=isFinite(c.line)&&c.a>0?money(c.line):"…";
+    o.notes.textContent="";
+    notes.forEach(function(x){var li=document.createElement("li");li.className=x[0];li.textContent=x[1];o.notes.appendChild(li);});
+  });
+  var ok=V>0,c=st.c;
+  var duty=V*(n(c.mfn)+n(c.s232))/100,mpf=ok?Math.min(Math.max(V*n(c.mpf)/100,MPF_MIN),MPF_MAX):0,hmf=V*n(c.hmf)/100;
+  var log=n(c.frt)+n(c.brk)+n(c.us),sub=V+duty+mpf+hmf+log,cont=sub*n(c.cont)/100,landed=sub+cont,supply=landed+n(c.eng);
+  var crew=n(st.i.ppl)*n(st.i.days)*n(st.i.hrs)*n(st.i.rate),inst=st.i.on?crew+n(st.i.other):0;
+  var cost=supply+inst,m=n(st.m.target)/100,calcS=m<1?supply/(1-m):NaN,calcI=m<1?inst/(1-m):NaN,calcT=calcS+calcI;
+  var manS=st.m.ps!==""&&isFinite(+st.m.ps),manI=st.i.on&&st.m.pi!==""&&isFinite(+st.m.pi);
+  var ps=manS?+st.m.ps:Math.round(calcS),pi=st.i.on?(manI?+st.m.pi:Math.round(calcI)):0;
+  var price=ps+pi,gp=price-cost,gm=price>0?gp/price*100:NaN,sf=A*SQFT,gov=duty+mpf+hmf;
+  var T={ok:ok,V:V,A:A,U:U,KG:KG,sf:sf,duty:duty,mpf:mpf,hmf:hmf,gov:gov,log:log,cont:cont,landed:landed,supply:supply,inst:inst,cost:cost,ps:ps,pi:pi,price:price,gp:gp,gm:gm,notes:nNotes,rowsC:rowsC};
+
+  setT("s-count",st.rows.length?"строк: "+st.rows.length+(nNotes?" · замечаний: "+nNotes:""):"пусто");
+  setT("s-units",U?num(U,0):"…");
+  setT("s-area",A>0?num(A,1)+" м² · "+num(sf,0)+" sq ft":"…");
+  setT("s-fact",ok?money(V):"…");
+  setT("s-kg",KG>0?num(KG,0)+" кг · "+num(KG*LB,0)+" lb":"…");
+  var hb=$("s-heavybox"),sm=$("s-msg");hb.classList.remove("bad","mid","good");sm.classList.remove("bad","mid","good");
+  if(heavy){var cl=heavy.tot>200?"bad":heavy.tot>100?"mid":"good";hb.classList.add(cl);sm.classList.add(cl);
+    setT("s-heavy",num(heavy.tot,0)+" кг · "+num(heavy.tot*LB,0)+" lb");
+    sm.textContent=(heavy.mark?heavy.mark+", ":"")+"около "+num(heavy.tot,0)+" кг на "+PIECE[heavy.piece]+". "+wText(heavy.tot);
+  }else{setT("s-heavy","…");sm.textContent="";}
+  var warn="";
+  if(st.cur==="EUR"&&!(k>0))warn="Ставки стоят в евро, а курс не вписан. Впиши курс в разделе «Ставки», иначе цена завода не считается.";
+  else if(noPrice)warn="Строк без цены: "+noPrice+". Выбери систему со ставкой или впиши просчёт завода.";
+  setT("s-warn",warn);
+  var tips=[];
+  if(has.ls)tips.push("Раздвижные двери. Раму топят в чистый пол, поэтому к высоте до пола завод прибавляет 60 мм. Если пол снаружи на том же уровне, что внутри, у порога нужен дренажный лоток.");
+  if(has.fc)tips.push("Фасад. Верхний и нижний ригель прячут в отделку, к высоте проёма завод прибавляет около 100 мм. Стекло ставят на объекте, поэтому вес показан для одного стеклопакета. Фасад в несколько ярусов вводи отдельной строкой на каждый ярус.");
+  if(has.bars)tips.push("Накладные шпросы. Под них нужен дуплексный стеклопакет: рамка внутри пакета идёт точно под шпросом. Если в заказе есть раздвижные двери, на всех окнах ставят плоские шпросы.");
+  var tp=$("s-tips");tp.textContent="";
+  tips.forEach(function(x){var li=document.createElement("li");li.textContent=x;tp.appendChild(li);});
+
+  renderCal(rowsC);
+
+  setT("l-duty",ok?money(duty):"…");setT("l-fees",ok?money(mpf+hmf):"…");setT("l-log",ok?money(log):"…");
+  setT("l-cont",ok?money(cont):"…");setT("l-land",ok?money(supply):"…");setT("l-mult",ok?num(supply/V,2)+"×":"…");
+  $("inst-f").style.display=st.i.on?"":"none";$("m-pi-l").style.display=st.i.on?"":"none";$("p-sf2box").style.display=st.i.on?"":"none";
+  setT("i-crew",money(crew));setT("i-tot",money(crew+n(st.i.other)));
+  $("m-ps").placeholder=ok&&isFinite(calcS)?"расчётная "+nf0.format(Math.round(calcS)):"";
+  $("m-pi").placeholder=ok&&isFinite(calcI)?"расчётная "+nf0.format(Math.round(calcI)):"";
+  setT("p-cost",ok?money(cost):"…");setT("p-calc",ok?money(calcT):"…");setT("p-calc-l","расчётная цена при марже "+pct(n(st.m.target),1));
+  setT("p-price",ok?money(price):"…");setT("p-gm",ok?pct(gm,1):"…");setT("p-gp",ok?money(gp):"…");
+  setT("p-sf1",ok&&sf>0?money(ps/sf):"…");setT("p-sf2",ok&&sf>0?money(price/sf):"…");
+  var gb=$("p-gmbox"),pm=$("p-msg");gb.classList.remove("bad","mid","good");pm.classList.remove("bad","mid","good");
+  if(!ok){pm.textContent="";}
+  else{
+    var diff=price-Math.round(calcT);
+    if(gp<0){gb.classList.add("bad");pm.classList.add("bad");pm.textContent="Цена ниже затрат на "+money(-gp)+". В таком виде заказ убыточный.";}
+    else if(diff<-0.5){gb.classList.add("mid");pm.classList.add("mid");pm.textContent="Цена ниже расчётной на "+money(-diff)+": маржа "+pct(gm,1)+" вместо "+pct(n(st.m.target),1)+". Если идёшь на это сознательно, например ради первого референса, запиши, сколько маржи отдал.";}
+    else if(diff>0.5){gb.classList.add("good");pm.classList.add("good");pm.textContent="Цена выше расчётной на "+money(diff)+", маржа "+pct(gm,1)+".";}
+    else{gb.classList.add("good");pm.textContent="Цена равна расчётной: затраты, делённые на (1 − маржа).";}
+  }
+  renderSum(T);renderProp(T);save();
+  return T;
+}
+function renderSum(T){
+  var tb=$("sumb");tb.textContent="";
+  function add(l,v,cls,txt){var tr=document.createElement("tr");if(cls)tr.className=cls;
+    var a=document.createElement("td");a.textContent=l;var b=document.createElement("td");b.className="num";b.textContent=txt!=null?txt:(T.ok?money(v):"…");
+    tr.appendChild(a);tr.appendChild(b);tb.appendChild(tr);}
+  var c=st.c;
+  add("Цена завода, она же таможенная стоимость",T.V);
+  add("Пошлина: "+pct(n(c.mfn),2)+" MFN + "+pct(n(c.s232),2)+" Section 232",T.duty);
+  add("MPF "+pct(n(c.mpf),4),T.mpf);add("HMF "+pct(n(c.hmf),3),T.hmf);
+  add("Международный фрахт и страховка",n(c.frt));add("Брокер, ISF, бонд",n(c.brk));add("Вывоз из порта, склад, доставка, подъём",n(c.us));
+  if(n(c.cont)>0)add("Резерв "+pct(n(c.cont),1),T.cont);
+  if(n(c.eng)>0)add("Инженерия и чертежи",n(c.eng));
+  add("Себестоимость изделий на объекте",T.supply,"b");
+  if(st.i.on){add("Монтаж",T.inst);add("Затраты всего",T.cost,"b");}
+  add(st.i.on?"Цена поставки":"Цена клиенту, только поставка",T.ps,st.i.on?"":"key");
+  if(st.i.on){add("Цена монтажа",T.pi);add("Цена клиенту, поставка и монтаж",T.price,"key");}
+  add("Валовая прибыль",T.gp,"b");add("Валовая маржа",0,"b",T.ok?pct(T.gm,1):"…");
+  add("Цена за sq ft"+(st.i.on?", с монтажом":""),0,"",T.ok&&T.sf>0?money(T.price/T.sf)+" при "+num(T.sf,0)+" sq ft":"…");
+}
+
+/* ---------- English proposal ---------- */
+function gcd(a,b){return b?gcd(b,a%b):a;}
+function inch(mm){var s=Math.round(mm/IN*16),w=Math.floor(s/16),f=s%16;if(!f)return w+'"';var g=gcd(f,16);return (w?w+" ":"")+(f/g)+"/"+(16/g)+'"';}
+function dEn(iso,plus){var a=String(iso||"").split("-"),d=a.length===3?new Date(+a[0],+a[1]-1,+a[2]):new Date();if(isNaN(d))d=new Date();
+  if(plus)d.setDate(d.getDate()+plus);return d.toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});}
+function defText(k){return DEF[k][mode()].join("\n");}
+function lines(k){var v=st.t[k]!=null?st.t[k]:defText(k);return String(v).split("\n").map(function(s){return s.trim();}).filter(Boolean);}
+function fillTexts(){[].forEach.call(document.querySelectorAll("[data-t]"),function(a){var k=a.getAttribute("data-t");a.value=st.t[k]!=null?st.t[k]:defText(k);});}
+function renderProp(T){
+  var box=$("paper"),xw=$("x-warn");
+  if(!T.ok){box.innerHTML='<p class="empty">Добавь изделия в ведомость, и здесь появится черновик предложения.</p>';xw.textContent="";return;}
+  var fi=st.i.on,p=st.p,h=[],valid=Math.max(1,Math.round(n(st.t.valid))||30);
+  if(!st.confirmed)h.push('<div class="draft">SAMPLE ONLY. Prices use training rates, not factory pricing. Do not send to a client.</div>');
+  h.push('<div class="ph"><div><div class="brand">ELWIDO</div><div class="tagl">European aluminum windows and doors</div></div>'+
+    '<div class="pt"><div class="doc">Budget Proposal</div>'+(p.no?"<div>No. "+esc(p.no)+"</div>":"")+"<div>"+esc(dEn(p.date))+"</div><div>Valid through "+esc(dEn(p.date,valid))+"</div></div></div>");
+  var meta=[];
+  if(p.name||p.addr)meta.push(["Project",[p.name,p.addr].filter(Boolean).join(", ")]);
+  if(p.client||p.attn)meta.push(["To",[p.client,p.attn?"Attn: "+p.attn:""].filter(Boolean).join(", ")]);
+  if(p.by)meta.push(["Prepared by",p.by]);
+  if(p.basis)meta.push(["Basis of proposal",p.basis]);
+  meta.push(["Scope",fi?"Furnish and install":"Supply only, delivered to your site, duty paid"]);
+  h.push("<dl>"+meta.map(function(x){return "<dt>"+x[0]+"</dt><dd>"+esc(x[1])+"</dd>";}).join("")+"</dl>");
+  h.push("<p>Thank you for the opportunity to price this project. This is our budget proposal to "+(fi?"furnish and install":"supply")+" the aluminum windows and doors listed below"+(fi?".":", delivered to your site, duty paid.")+"</p>");
+
+  h.push("<h3>Schedule of units</h3>");
+  var body="",units=0,anyG=st.rows.some(function(r,i){var c=T.rowsC[i];return c.g&&c.a>0&&c.q>0&&isFinite(c.line);});
+  st.rows.forEach(function(r,i){var c=T.rowsC[i];if(!(c.a>0&&c.q>0&&isFinite(c.line)))return;units+=c.q;
+    var sz=esc(inch(n(r.w))+" × "+inch(n(r.h))),ty=TYPES[r.type][1]+(c.pan>1?", "+c.pan+" "+TYPES[r.type][2]:"");
+    if(c.bars>0)ty+=", applied muntin bars with spacer bars in the glass ("+Math.round(n(r.bv))+" vertical, "+Math.round(n(r.bh))+" horizontal per lite)";
+    body+="<tr><td>"+esc(r.mark)+'</td><td class="num">'+c.q+"</td><td>"+ty+'<span class="mm msz">'+sz+'</span></td><td class="c-sz">'+
+      sz+'<span class="mm">'+enNum(n(r.w))+" × "+enNum(n(r.h))+" mm</span></td>"+(anyG?'<td class="c-gl">'+(c.g?esc(c.g.k+" "+c.g.f+" mm"):"")+"</td>":"")+'<td class="num">'+enNum(c.a*c.q*SQFT,1)+"</td></tr>";});
+  h.push('<table class="scope"><thead><tr><th>Mark</th><th class="num">Qty</th><th>Type</th><th class="c-sz">Unit size, W × H</th>'+(anyG?'<th class="c-gl">Glass</th>':"")+'<th class="num">Area, sq ft</th></tr></thead><tbody>'+body+
+    '<tr class="t"><td>Total</td><td class="num">'+units+'</td><td></td><td class="c-sz"></td>'+(anyG?'<td class="c-gl"></td>':"")+'<td class="num">'+enNum(T.sf,0)+"</td></tr></tbody></table>");
+  h.push("<p>All units are custom thermally broken aluminum, built to your drawings at our own plant in Slovakia."+(p.finish?" Finish: "+esc(p.finish)+".":"")+(p.glazing?" Glazing: "+esc(p.glazing)+".":"")+"</p>");
+
+  h.push('<div class="blk"><h3>Price</h3>');
+  var govR=Math.round(T.gov),pr=[];
+  pr.push(["Windows and doors, delivered to your site",T.ps-govR]);
+  pr.push(["U.S. import duties and customs fees at current rates ("+enNum(n(st.c.mfn)+n(st.c.s232),2)+"% duty plus customs fees)",govR]);
+  pr.push([fi?"Supply, delivered to your site, duty paid":"Total, supply only, delivered to your site, duty paid",T.ps,!fi]);
+  if(fi){pr.push(["Installation",T.pi]);pr.push(["Total, furnish and install",T.price,true]);}
+  h.push('<table class="price"><tbody>'+pr.map(function(x){return "<tr"+(x[2]?' class="t"':"")+"><td>"+x[0]+'</td><td class="num">'+usd(x[1])+"</td></tr>";}).join("")+"</tbody></table>");
+  if(T.sf>0)h.push("<p>That works out to about "+usd(T.ps/T.sf)+" per square foot of window area, material only, delivered, duty paid."+(fi?" Installed, about "+usd(T.price/T.sf)+" per square foot.":" Installation is a separate number.")+"</p>");
+  h.push("<p>Pricing is delivered to your site, duty paid. Import duties are shown as a separate line at the current rates. Any new or changed duty, tariff or import fee in effect at customs entry adjusts that line at cost, up or down, backed by the CBP entry summary.</p></div>");
+
+  function ul(k){return "<ul>"+lines(k).map(function(s){return "<li>"+esc(s)+"</li>";}).join("")+"</ul>";}
+  h.push('<div class="two blk"><div><h3>Inclusions</h3>'+ul("inc")+"</div><div><h3>Exclusions</h3>"+ul("exc")+"</div></div>");
+  h.push('<div class="blk"><h3>Assumptions</h3>'+ul("asm")+"</div>");
+  var a=Math.round(n(st.t.lt1)),b=Math.round(n(st.t.lt2));
+  h.push('<div class="blk"><h3>Lead time</h3><p>'+(b>a?a+" to "+b:(a||b))+" weeks to site from the latest of: approved shop drawings, final field dimensions, finish and glass selections, and receipt of the release payment.</p>");
+  h.push("<h3>Payment</h3><p>"+lines("pay").map(esc).join("<br>")+"</p></div>");
+  h.push('<div class="blk"><h3>Validity</h3><p>This proposal is valid for '+valid+" days, through "+esc(dEn(p.date,valid))+". It is budget pricing from the drawings listed above. For a firm proposal we need to confirm the performance requirements, the opening conditions and the "+(fi?"installation scope":"delivery conditions")+".</p>");
+  h.push('<div class="sign"><div>Accepted by, name and title</div><div>Signature and date</div></div></div>');
+  box.innerHTML=h.join("");
+  xw.textContent=/sch[uü]e?co/i.test(box.textContent)?"В тексте для клиента есть слово Schüco. Убери его, пока у ELWIDO нет письменного права продавать изделия на этой системе в США.":"";
+}
+
+/* ---------- static fields ---------- */
+var bound=[].slice.call(document.querySelectorAll("[data-b]"));
+function fill(){bound.forEach(function(i){var v=get(i.getAttribute("data-b"));if(i.type==="checkbox")i.checked=!!v;else i.value=(v==null?"":v);});fillTexts();
+  setT("r-tag",st.confirmed?"подтверждены":"учебные");$("r-tag").className=st.confirmed?"":"warn";
+  $("note").style.display=st.confirmed?"none":"";}
+bound.forEach(function(i){
+  var ev=(i.type==="checkbox"||i.tagName==="SELECT"||i.type==="date")?"change":"input";
+  i.addEventListener(ev,function(){
+    var path=i.getAttribute("data-b"),v;
+    if(i.type==="checkbox")v=i.checked;else if(i.type==="number"){v=i.value===""?"":parseFloat(i.value);if(typeof v==="number"&&!isFinite(v))v="";}else v=i.value;
+    set(path,v);
+    if(path==="i.on")fillTexts();
+    if(path==="cur"){renderRates();renderRows();}
+    if(path==="confirmed")fill();
+    recalc();
+  });
+});
+[].forEach.call(document.querySelectorAll("[data-t]"),function(a){a.addEventListener("input",function(){st.t[a.getAttribute("data-t")]=a.value;recalc();});});
+[].forEach.call(document.querySelectorAll(".seg button"),function(b){b.addEventListener("click",function(){st.unit=b.getAttribute("data-u");renderRows();recalc();});});
+
+function arm(btn,warn,fn){var label=btn.textContent,armed=false,t;
+  btn.addEventListener("click",function(){
+    if(!armed){armed=true;btn.textContent=warn;t=setTimeout(function(){armed=false;btn.textContent=label;},4000);return;}
+    clearTimeout(t);armed=false;btn.textContent=label;fn();
+  });}
+function all(){fill();renderRates();renderRows();recalc();}
+function keepT(s){var t=st.t;s.t.lt1=t.lt1;s.t.lt2=t.lt2;s.t.valid=t.valid;s.p.by=st.p.by;return s;}
+arm($("b-sample"),"Заменит заказ и ставки. Нажми ещё раз",function(){st=keepT(sample());all();});
+arm($("b-f22"),"Заменит заказ и ставки. Нажми ещё раз",function(){st=keepT(sampleF22());all();});
+arm($("b-new"),"Сотрёт заказ. Нажми ещё раз",function(){var o=st,s=blank();s.rates=o.rates;s.cur=o.cur;s.fx=o.fx;s.bar=o.bar;s.confirmed=o.confirmed;s.unit=o.unit;s.t=o.t;s.p.by=o.p.by;st=s;all();});
+arm($("b-rdef"),"Сотрёт твои ставки. Нажми ещё раз",function(){st.rates=defRates();st.cur="USD";st.bar=40;st.confirmed=false;all();});
+$("b-tdef").addEventListener("click",function(){st.t.inc=st.t.exc=st.t.asm=st.t.pay=null;st.t.lt1=14;st.t.lt2=20;st.t.valid=30;fill();recalc();});
+$("b-add").addEventListener("click",function(){
+  var last=st.rows[st.rows.length-1],type=last?last.type:"tt",f=ratesOf(type)[0];
+  st.rows.push({id:uid(),mark:"",type:type,rid:last&&last.rid?last.rid:(f?f.id:""),w:"",h:"",gf:last?(last.gf||""):"t52",gl:last?last.gl:18,pan:type==="ls"?2:1,qty:1,bv:0,bh:0,act:""});
+  renderRows();recalc();
+  var ins=$("sch-t").lastElementChild;if(ins){var i=ins.querySelector("input");if(i)i.focus();}
+});
+$("b-rate").addEventListener("click",function(){st.rates.push({id:uid(),sys:"",type:"tt",rate:""});renderRates();renderRows();recalc();
+  var tr=$("ratesb").lastElementChild;if(tr){var i=tr.querySelector("input");if(i)i.focus();}});
+$("b-print").addEventListener("click",function(){window.print();});
+$("b-copy").addEventListener("click",function(){
+  var text=$("paper").innerText,box=$("copybox"),msg=$("status");
+  function fallback(){box.style.display="block";box.value=text;box.focus();box.select();msg.textContent="Текст выделен ниже, скопируй его вручную.";}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){msg.textContent="Скопировано. Вставь в письмо или документ.";},fallback);}
+  else fallback();
+});
+
+all();
+window.ELWIDO_QUOTE={state:function(){return st;},totals:function(){return recalc();}};
+})();
+</script>
+</body>
+</html>
