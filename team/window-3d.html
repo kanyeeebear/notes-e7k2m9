@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="theme-color" content="#f2f4f3">
 <title>3D-окно · ELWIDO</title>
-<link rel="stylesheet" href="../assets/window-3d.css?v=3">
+<link rel="stylesheet" href="../assets/window-3d.css?v=4">
 <script>try{var theme=localStorage.getItem('elwido-theme');if(theme==='light'||theme==='dark')document.documentElement.dataset.theme=theme;}catch(e){}</script>
 </head>
 <body data-view="window">
@@ -45,9 +45,11 @@
         <div class="viewer-caption"><span class="status-dot" aria-hidden="true"></span><span id="opening-caption">Створка закрыта</span><span class="view-hint">Потяни, чтобы вращать</span></div>
       </div>
       <div class="drawing-actions" id="drawing-actions" hidden>
-        <button type="button" class="drawing-export primary" id="print-drawing">Печать / PDF</button>
+        <button type="button" class="drawing-export primary" id="download-pdf">Скачать PDF</button>
         <button type="button" class="drawing-export" id="download-dxf">Скачать DXF</button>
+        <button type="button" class="drawing-export" id="print-drawing">Печать</button>
         <span>W-01 · эскиз, не для производства</span>
+        <span class="export-status" id="export-status" role="status"></span>
       </div>
       <div class="model-strip" aria-label="Текущая конструкция">
         <div><span>Габарит рамы</span><strong id="size-summary">1 200 × 1 500 мм</strong></div>
@@ -114,7 +116,7 @@
 document.getElementById('retry').addEventListener('click',function(){location.reload();});
 </script>
 <script type="module">
-import('../assets/window-3d.js?v=3').then(module=>module.start()).catch(error=>{
+import('../assets/window-3d.js?v=4').then(module=>module.start()).catch(error=>{
   console.error('ELWIDO 3D:',error);
   document.getElementById('loading').hidden=true;
   document.getElementById('viewer-error').hidden=false;

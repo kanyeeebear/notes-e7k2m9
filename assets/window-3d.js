@@ -89,7 +89,7 @@ export function start(){
     $('drawing-screen').innerHTML=drawingSVG(params,drawingSide);$('print-sheet').innerHTML=printSheet(params);
     if(activeView==='drawing')document.querySelectorAll('[data-camera]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.camera===drawingSide?'true':'false'));
   }
-  function exportState(){const invalid=!!document.querySelector('[aria-invalid="true"]');$('print-drawing').disabled=invalid;$('download-dxf').disabled=invalid;}
+  function exportState(){const invalid=!!document.querySelector('[aria-invalid="true"]');$('print-drawing').disabled=invalid;$('download-dxf').disabled=invalid;$('download-pdf').disabled=invalid;}
   function workspace(which){
     if(!['window','section','drawing'].includes(which))return;
     activeView=which;document.body.dataset.view=which;
@@ -110,6 +110,12 @@ export function start(){
   document.querySelectorAll('#workspace-tabs button').forEach(b=>{b.addEventListener('click',()=>workspace(b.dataset.view));b.addEventListener('keydown',e=>{const keys=['window','section','drawing'];let i=keys.indexOf(activeView);if(e.key==='ArrowRight')i=(i+1)%3;else if(e.key==='ArrowLeft')i=(i+2)%3;else if(e.key==='Home')i=0;else if(e.key==='End')i=2;else return;e.preventDefault();workspace(keys[i]);$('tab-'+keys[i]).focus();});});
   $('section-part').addEventListener('change',()=>{sectionPart=$('section-part').value;sectionModel.highlight(sectionPart);$('section-description').textContent=SECTION_PARTS[sectionPart].text;dirty=true;});
   $('download-dxf').addEventListener('click',()=>downloadDrawing(params));
+  $('download-pdf').addEventListener('click',async()=>{
+    const snapshot={...params};$('download-pdf').disabled=true;$('export-status').textContent='Готовлю PDF…';
+    try{const module=await import('./window-pdf.js?v=1');await module.downloadPDF(snapshot);$('export-status').textContent='PDF готов.';}
+    catch(error){console.error(error);$('export-status').textContent='Не удалось сформировать PDF. Попробуй ещё раз.';}
+    finally{exportState();}
+  });
   const pageTitle=document.title;
   $('print-drawing').addEventListener('click',()=>{updateDrawing();document.title=`ELWIDO-W01-${params.width}x${params.height}`;window.print();});
   window.addEventListener('beforeprint',updateDrawing);window.addEventListener('afterprint',()=>{document.title=pageTitle;});
