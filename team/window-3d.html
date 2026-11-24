@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#f2f4f3">
+<title>3D-окно · ELWIDO</title>
+<link rel="stylesheet" href="../assets/window-3d.css">
+<script>try{var theme=localStorage.getItem('elwido-theme');if(theme==='light'||theme==='dark')document.documentElement.dataset.theme=theme;}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#settings">К параметрам окна</a>
+<div class="app">
+  <nav class="topbar" aria-label="ELWIDO">
+    <a class="brand" href="index.html">ELWIDO</a>
+    <a class="back" href="index.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Инструменты</a>
+    <button class="icon-button theme-button" id="theme-toggle" type="button" aria-label="Переключить тему"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg></button>
+  </nav>
+  <header class="intro">
+    <div><h1>Окно <span>в твоих руках</span></h1><p>Поверни модель. Подбери размеры и стекло. Посмотри, как работает створка.</p></div>
+    <span class="study-label">Учебная модель</span>
+  </header>
+  <main class="workbench">
+    <section class="viewer-column" aria-label="Трёхмерное окно">
+      <div class="viewer" id="viewer" aria-busy="true">
+        <div class="viewer-tools" role="group" aria-label="Вид на окно" inert>
+          <button class="view-button" type="button" data-camera="inside" aria-pressed="false">Из комнаты</button>
+          <button class="view-button" type="button" data-camera="outside" aria-pressed="false">С улицы</button>
+          <button class="icon-button reset-view" type="button" id="reset-view" aria-label="Вернуть исходный ракурс" title="Вернуть исходный ракурс"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 2 8M4 4v6h6"/></svg></button>
+        </div>
+        <div class="canvas-mount" id="canvas-mount"></div>
+        <div class="dimension" id="dimension-width" aria-hidden="true"></div>
+        <div class="dimension" id="dimension-height" aria-hidden="true"></div>
+        <div class="loading" id="loading" role="status"><span class="loading-mark"></span><span>Собираю окно…</span></div>
+        <div class="viewer-error" id="viewer-error" role="alert" hidden><strong>Не удалось открыть 3D</strong><p>Обнови страницу. Если модель не появится, открой её в браузере с поддержкой WebGL.</p><button type="button" id="retry">Обновить страницу</button></div>
+        <div class="viewer-caption"><span class="status-dot" aria-hidden="true"></span><span id="opening-caption">Створка закрыта</span><span class="view-hint">Потяни, чтобы вращать</span></div>
+      </div>
+      <div class="model-strip" aria-label="Текущая конструкция">
+        <div><span>Габарит рамы</span><strong id="size-summary">1 200 × 1 500 мм</strong></div>
+        <div><span>Стеклопакет</span><strong id="glass-summary">3 стекла · 44 мм</strong></div>
+        <div><span>Открывание</span><strong id="hinge-summary">Петли слева</strong></div>
+      </div>
+      <p class="viewer-help"><span class="desktop-help">Мышью вращай окно, колёсиком меняй масштаб. С клавиатуры: стрелки вращают модель, + и − приближают и отдаляют.</span><span class="mobile-help">Один палец вращает окно, два пальца меняют масштаб.</span></p>
+    </section>
+    <aside class="settings" id="settings" aria-label="Параметры окна" inert>
+      <fieldset class="setting-group opening-group">
+        <legend>Открой створку</legend>
+        <div class="opening-options" role="group" aria-label="Режим открывания">
+          <button type="button" class="opening-button" data-mode="closed" aria-pressed="true"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 4h18v24H7zM10 7h12v18H10zM20 15v5"/></svg><span>Закрыто</span></button>
+          <button type="button" class="opening-button" data-mode="turn" aria-pressed="false"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 4h18v24H7zM7 4l12 5v18L7 28M16 16v4"/></svg><span>Поворот</span></button>
+          <button type="button" class="opening-button" data-mode="tilt" aria-pressed="false"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 4h18v24H7zM7 28l3-19h12l3 19M20 14v4"/></svg><span>Откинуть</span></button>
+        </div>
+        <div class="range-heading"><label for="angle">Угол открывания</label><output for="angle" id="angle-value">0°</output></div>
+        <input id="angle" type="range" min="0" max="90" step="1" value="0" disabled>
+        <p class="control-note" id="mode-note">Выбери поворот или откидывание.</p>
+      </fieldset>
+      <fieldset class="setting-group">
+        <legend>Размеры рамы</legend>
+        <div class="dimension-control">
+          <div class="range-heading"><label for="width">Ширина</label><div class="numeric"><input id="width" type="number" min="600" max="1600" step="10" value="1200" inputmode="numeric" aria-describedby="size-note width-error"><span>мм</span></div></div>
+          <input id="width-range" aria-label="Ширина ползунком" type="range" min="600" max="1600" step="10" value="1200">
+          <p class="field-error" id="width-error" role="alert"></p>
+        </div>
+        <div class="dimension-control">
+          <div class="range-heading"><label for="height">Высота</label><div class="numeric"><input id="height" type="number" min="800" max="2400" step="10" value="1500" inputmode="numeric" aria-describedby="size-note height-error"><span>мм</span></div></div>
+          <input id="height-range" aria-label="Высота ползунком" type="range" min="800" max="2400" step="10" value="1500">
+          <p class="field-error" id="height-error" role="alert"></p>
+        </div>
+        <p class="control-note" id="size-note">Диапазон этой модели: ширина 600–1600 мм, высота 800–2400 мм.</p>
+      </fieldset>
+      <fieldset class="setting-group glass-group">
+        <legend>Стеклопакет</legend>
+        <label class="glass-option"><input type="radio" name="glass" value="double28"><span><strong>2 стекла <b>28 мм</b></strong><small>6–16–6 · одна камера</small></span></label>
+        <label class="glass-option"><input type="radio" name="glass" value="triple44" checked><span><strong>3 стекла <b>44 мм</b></strong><small>4–16–4–16–4 · две камеры</small></span></label>
+        <label class="glass-option"><input type="radio" name="glass" value="triple52"><span><strong>3 стекла <b>52 мм</b></strong><small>6–18–6–16–6 · две камеры</small></span></label>
+      </fieldset>
+      <fieldset class="setting-group hinge-group">
+        <legend>Петли, вид из комнаты</legend>
+        <div class="hinge-options" role="group" aria-label="Сторона петель"><button type="button" data-hinge="left" aria-pressed="true">Слева</button><button type="button" data-hinge="right" aria-pressed="false">Справа</button></div>
+      </fieldset>
+    </aside>
+  </main>
+  <footer class="scope-note">Учебная модель алюминиевого окна. Геометрия профиля и работа фурнитуры упрощены; диапазон размеров не означает допуск конкретной системы.</footer>
+  <p class="sr-only" id="model-announcement" role="status" aria-live="polite"></p>
+  <noscript><p>Чтобы вращать и настраивать окно, включи JavaScript в браузере.</p></noscript>
+</div>
+<script>
+document.getElementById('retry').addEventListener('click',function(){location.reload();});
+</script>
+<script type="module">
+import('../assets/window-3d.js').then(module=>module.start()).catch(error=>{
+  console.error('ELWIDO 3D:',error);
+  document.getElementById('loading').hidden=true;
+  document.getElementById('viewer-error').hidden=false;
+  document.querySelector('.settings').inert=true;
+  document.querySelector('.viewer-tools').inert=true;
+});
+</script>
+</body>
+</html>
