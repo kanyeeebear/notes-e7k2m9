@@ -18,6 +18,18 @@ export function validSize(value,axis){
   return !!bounds && Number.isFinite(value) && value>=bounds[0] && value<=bounds[1];
 }
 
+export function fitDistanceForBox(box,target,direction,aspect,fov,widthPixels,heightPixels){
+  const d=direction.clone().normalize(),right=new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0),d).normalize(),up=new THREE.Vector3().crossVectors(d,right);
+  const tangent=Math.tan(THREE.MathUtils.degToRad(fov/2));
+  const xLimit=Math.max(.3,1-56/widthPixels),topLimit=Math.max(.3,1-148/heightPixels),bottomLimit=Math.max(.3,1-96/heightPixels);
+  let distance=.45;
+  for(const x of [box.min.x,box.max.x])for(const y of [box.min.y,box.max.y])for(const z of [box.min.z,box.max.z]){
+    const q=new THREE.Vector3(x,y,z).sub(target),qx=q.dot(right),qy=q.dot(up),qz=q.dot(d);
+    distance=Math.max(distance,qz+Math.abs(qx)/(tangent*aspect*xLimit),qz+Math.abs(qy)/(tangent*(qy>=0?topLimit:bottomLimit)));
+  }
+  return distance+.06;
+}
+
 function rectPath(w,h){
   return new THREE.Shape().moveTo(-w/2,-h/2).lineTo(w/2,-h/2).lineTo(w/2,h/2).lineTo(-w/2,h/2).closePath();
 }

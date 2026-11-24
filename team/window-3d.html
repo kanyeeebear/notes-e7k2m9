@@ -89,7 +89,7 @@
 document.getElementById('retry').addEventListener('click',function(){location.reload();});
 </script>
 <script type="module">
-import('../assets/window-3d.js').then(module=>module.start()).catch(error=>{
+import('../assets/window-3d.js?v=2').then(module=>module.start()).catch(error=>{
   console.error('ELWIDO 3D:',error);
   document.getElementById('loading').hidden=true;
   document.getElementById('viewer-error').hidden=false;

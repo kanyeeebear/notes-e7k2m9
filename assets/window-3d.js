@@ -1,7 +1,7 @@
 import * as THREE from './vendor/three-r170/three.module.min.js';
 import {OrbitControls} from './vendor/three-r170/OrbitControls.js';
 import {RoomEnvironment} from './vendor/three-r170/RoomEnvironment.js';
-import {buildWindow,createMaterials,DEFAULTS,GLASS,LIMITS,glassThickness,validSize} from './window-model.js';
+import {buildWindow,createMaterials,DEFAULTS,GLASS,LIMITS,validSize,fitDistanceForBox} from './window-model.js?v=2';
 
 export function start(){
   const $=id=>document.getElementById(id),viewer=$('viewer'),mount=$('canvas-mount');
@@ -28,7 +28,7 @@ export function start(){
 
   const materials=createMaterials();let model=buildWindow(params,materials);scene.add(model.root);
   const controls=new OrbitControls(camera,canvas);controls.enableDamping=true;controls.dampingFactor=.09;controls.minDistance=.45;controls.maxDistance=12;controls.maxPolarAngle=Math.PI-.08;controls.minPolarAngle=.08;controls.enablePan=false;
-  let dirty=true,rebuildPending=false,refitPending=false,previousTime=0,announcePending=false;
+  let dirty=true,rebuildPending=false,refitPending=false,previousTime=0,announcePending=false,automaticView=true;
   let dimensionLines=null;
   const measureMaterial=new THREE.LineBasicMaterial({color:0x849299,transparent:true,opacity:.65,depthTest:false});
   const labelPositions={width:new THREE.Vector3(),height:new THREE.Vector3()};
@@ -44,19 +44,18 @@ export function start(){
   $('theme-toggle').addEventListener('click',()=>{const choice=isDark()?'light':'dark';document.documentElement.dataset.theme=choice;try{localStorage.setItem('elwido-theme',choice);}catch{}theme();});
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change',theme);
 
-  function fitDistance(){return Math.max(model.height*1.35,(model.width+.28)/camera.aspect)*.5/Math.tan(THREE.MathUtils.degToRad(camera.fov/2));}
+  function fitDistance(direction){return fitDistanceForBox(new THREE.Box3().setFromObject(model.root),controls.target,direction,camera.aspect,camera.fov,viewer.clientWidth,viewer.clientHeight);}
   function view(which){
     controls.target.set(0,model.height*.48,0);
-    const distance=fitDistance();
     const direction=which==='inside'?new THREE.Vector3(0,.02,1):which==='outside'?new THREE.Vector3(0,.02,-1):new THREE.Vector3(1,.36,1.75).normalize();
-    camera.position.copy(controls.target).addScaledVector(direction,distance);camera.lookAt(controls.target);controls.update();
+    automaticView=true;camera.position.copy(controls.target).addScaledVector(direction.normalize(),fitDistance(direction));camera.lookAt(controls.target);controls.update();
     document.querySelectorAll('[data-camera]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.camera===which?'true':'false'));
     dirty=true;
   }
   document.querySelectorAll('[data-camera]').forEach(b=>b.addEventListener('click',()=>view(b.dataset.camera)));
   $('reset-view').addEventListener('click',()=>view('oblique'));
   controls.addEventListener('change',()=>{dirty=true;});
-  controls.addEventListener('start',()=>document.querySelectorAll('[data-camera]').forEach(b=>b.setAttribute('aria-pressed','false')));
+  controls.addEventListener('start',()=>{automaticView=false;document.querySelectorAll('[data-camera]').forEach(b=>b.setAttribute('aria-pressed','false'));});
 
   function dimensions(){
     if(dimensionLines){dimensionLines.geometry.dispose();scene.remove(dimensionLines);}
@@ -82,7 +81,7 @@ export function start(){
   function rebuild(){
     const oldTarget=controls.target.clone(),oldDirection=camera.position.clone().sub(oldTarget).normalize();
     model.dispose();model=buildWindow(params,materials);scene.add(model.root);model.pose(opening.mode,opening.angle,opening.handle);summary();
-    if(refitPending){controls.target.set(0,model.height*.48,0);camera.position.copy(controls.target).addScaledVector(oldDirection,fitDistance());controls.update();}
+    if(refitPending){controls.target.set(0,model.height*.48,0);camera.position.copy(controls.target).addScaledVector(oldDirection,fitDistance(oldDirection));controls.update();}
     refitPending=false;rebuildPending=false;announcePending=true;dirty=true;
   }
 
@@ -124,11 +123,11 @@ export function start(){
     else if(event.key==='+'||event.key==='=')spherical.radius=Math.max(controls.minDistance,spherical.radius*.9);
     else if(event.key==='-'||event.key==='−')spherical.radius=Math.min(controls.maxDistance,spherical.radius/ .9);
     else return;
-    event.preventDefault();camera.position.setFromSpherical(spherical).add(controls.target);controls.update();dirty=true;
+    event.preventDefault();automaticView=false;camera.position.setFromSpherical(spherical).add(controls.target);controls.update();dirty=true;
   });
 
   let firstSize=true;
-  function resize(){const width=viewer.clientWidth,height=viewer.clientHeight;if(!width||!height)return;camera.aspect=width/height;camera.updateProjectionMatrix();renderer.setSize(width,height,false);if(firstSize){view('oblique');firstSize=false;}dirty=true;}
+  function resize(){const width=viewer.clientWidth,height=viewer.clientHeight;if(!width||!height)return;camera.aspect=width/height;camera.updateProjectionMatrix();renderer.setSize(width,height,false);if(firstSize){view('oblique');firstSize=false;}else if(automaticView){const d=camera.position.clone().sub(controls.target).normalize();camera.position.copy(controls.target).addScaledVector(d,fitDistance(d));controls.update();}dirty=true;}
   const observer=new ResizeObserver(resize);observer.observe(viewer);
   canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();$('viewer-error').hidden=false;document.querySelector('.settings').inert=true;});
   canvas.addEventListener('webglcontextrestored',()=>location.reload());
@@ -149,6 +148,7 @@ export function start(){
     moving=moving||Math.abs(previousHandle-opening.handle)>.001;
     if(moving||dirty){
       model.pose(opening.mode,opening.angle,opening.handle);
+      if(automaticView){const d=camera.position.clone().sub(controls.target).normalize(),current=camera.position.distanceTo(controls.target),required=fitDistance(d);const distance=required>current?required:THREE.MathUtils.lerp(current,required,1-Math.exp(-dt*10));camera.position.copy(controls.target).addScaledVector(d,distance);}
       $('angle-value').textContent=Math.round(opening.angle)+'°';
       $('opening-caption').textContent=opening.pending?'Закрываем створку перед сменой режима':opening.mode==='closed'||opening.angle<.1?'Створка закрыта':opening.mode==='turn'?`Поворот внутрь · ${Math.round(opening.angle)}°`:`Откинуто внутрь · ${Math.round(opening.angle)}°`;
       dirty=true;
