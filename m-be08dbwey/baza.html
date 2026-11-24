@@ -253,7 +253,7 @@ body{margin:0;caret-color:var(--ink)}
 .rail-search{min-height:44px}
 .btn,.btn.small,.fc-controls select{min-height:44px;height:auto;padding-block:10px}
 .chapter-end{gap:10px;flex-wrap:wrap}
-.window-lab{margin-top:26px;margin-bottom:32px;border:1px solid var(--rule);background:var(--sheet);border-radius:4px;overflow:hidden}
+.window-lab{scroll-margin-top:72px;margin-top:26px;margin-bottom:32px;border:1px solid var(--rule);background:var(--sheet);border-radius:4px;overflow:hidden}
 .wl-head{padding:20px 22px 16px;border-bottom:1px solid var(--rule)}
 .chapter .wl-head h3{font:500 28px/1.15 var(--f-display);padding:0;border:0;margin:0 0 8px;text-transform:none}
 .chapter .wl-head p{font-size:15px;line-height:1.5;color:var(--ink-2);margin:0;max-width:56ch}
@@ -3895,6 +3895,12 @@ window.GLOSSARY=[
   lab.querySelectorAll("[role=tab]").forEach(function(b){b.addEventListener("click",function(){changeView(b.getAttribute("data-view"));});b.addEventListener("keydown",function(e){if(["ArrowLeft","ArrowRight","Home","End"].indexOf(e.key)<0)return;e.preventDefault();var v=e.key==="Home"?"front":e.key==="End"?"section":view==="front"?"section":"front";changeView(v);document.getElementById("wl-tab-"+v).focus();});});
   lab.querySelector(".wl-next").addEventListener("click",function(){var keys=Object.keys(data).filter(function(k){return data[k].view===view;});select(keys[(keys.indexOf(selected)+1)%keys.length]);});
   changeView("front");lab.hidden=false;
+  // The deep-link target becomes visible only after enhancement. Resolve it after layout.
+  if(location.hash==="#window-lab"){
+    var reveal=function(){lab.scrollIntoView({block:"start",behavior:"instant"});};
+    if(document.readyState==="complete")requestAnimationFrame(reveal);
+    else window.addEventListener("load",function(){requestAnimationFrame(reveal);},{once:true});
+  }
   var original=document.querySelector(".wl-original");if(original)original.open=false;
   var beforePrint=false;
   window.addEventListener("beforeprint",function(){if(original){beforePrint=original.open;original.open=true;}});
